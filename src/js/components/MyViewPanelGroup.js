@@ -1,4 +1,4 @@
-import { createElement as vNode, useState } from "../../../../vendor/react.js";
+import { createElement as vNode, useState } from "../../../vendor/react.js";
 import MyViewPanel from "./MyViewPanel.js";
 import { Collapse } from "../../../vendor/tdesign.min.js";
 const { Panel: CollapsePanel } = Collapse;
