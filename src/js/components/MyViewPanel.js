@@ -1,8 +1,8 @@
-import { createElement as vNode, useState, useEffect } from "../../../../vendor/react.js";
+import { createElement as vNode, useState, useEffect } from "../../../vendor/react.js";
 import MyVis from "../lib/my-vis.mjs.js";
 import {
   MessagePlugin,
-} from "../../../../vendor/tdesign.min.js";
+} from "../../../vendor/tdesign.min.js";
 
 export default function MyViewPanel(props) {
 
