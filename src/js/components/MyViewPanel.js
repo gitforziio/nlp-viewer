@@ -126,7 +126,7 @@ export default function MyViewPanel(props) {
           "btn-outline-secondary",
         ].join(" "),
         onClick: ()=>{myVis.resize();},
-      }, "调整尺寸"),
+      }, "调整布局"),
       vNode('button', {
         type: "button",
         className: [
