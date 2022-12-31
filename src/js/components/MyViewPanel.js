@@ -81,40 +81,40 @@ export default function MyViewPanel(props) {
         }, alt) : null,
         vNode('diagram', {
           id: elementId, className: "diagram",
-          onClick: ()=>{
-            MessagePlugin.info('onClick');
-            console.log("onClick");
-          },
-          ontick: ()=>{
-            // MessagePlugin.info('ontick');
-            console.log("ontick");
-            myVis.resize();
-          },
-          onTick: ()=>{
-            // MessagePlugin.info('onTick');
-            console.log("onTick");
-            myVis.resize();
-          },
-          onEnd: ()=>{
-            MessagePlugin.info('onEnd');
-            console.log("onEnd");
-          },
-          onDragStart: ()=>{
-            MessagePlugin.info('onDragStart');
-            console.log("onDragStart");
-          },
-          onDrag: ()=>{
-            // MessagePlugin.info('onDrag');
-            // console.log("onDrag");
-          },
-          onDragEnd: ()=>{
-            MessagePlugin.info('onDragEnd');
-            console.log("onDragEnd");
-          },
-          onResize: ()=>{
-            MessagePlugin.info('onResize');
-            // console.log("onResize");
-          },
+          // onClick: ()=>{
+          //   MessagePlugin.info('onClick');
+          //   console.log("onClick");
+          // },
+          // ontick: ()=>{
+          //   // MessagePlugin.info('ontick');
+          //   console.log("ontick");
+          //   myVis.resize();
+          // },
+          // onTick: ()=>{
+          //   // MessagePlugin.info('onTick');
+          //   console.log("onTick");
+          //   myVis.resize();
+          // },
+          // onEnd: ()=>{
+          //   MessagePlugin.info('onEnd');
+          //   console.log("onEnd");
+          // },
+          // onDragStart: ()=>{
+          //   MessagePlugin.info('onDragStart');
+          //   console.log("onDragStart");
+          // },
+          // onDrag: ()=>{
+          //   // MessagePlugin.info('onDrag');
+          //   // console.log("onDrag");
+          // },
+          // onDragEnd: ()=>{
+          //   MessagePlugin.info('onDragEnd');
+          //   console.log("onDragEnd");
+          // },
+          // onResize: ()=>{
+          //   MessagePlugin.info('onResize');
+          //   // console.log("onResize");
+          // },
         })
       ]),
     ]),

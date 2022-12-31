@@ -1,4 +1,4 @@
-import { createElement as vNode, Fragment, useState } from "../../../../vendor/react.js";
+import { createElement as vNode, Fragment, useState, useMemo } from "../../../../vendor/react.js";
 // import ReactRouterDom from "../../../../vendor/react-router-dom.js";
 import MyViewPanelGroup from "../../components/MyViewPanelGroup.js";
 import {
@@ -119,9 +119,9 @@ export default function FileReaderDemo() {
   const [data_item, set_data_item] = useState({});
   const [data_idx_control__main_idx, set__data_idx_control__main_idx] = useState(0);
   const [data_idx_control__nlp_idx, set__data_idx_control__nlp_idx] = useState(0);
-  const compute_nlp_data = () => {
+  const nlp_data = useMemo(()=>{
     return (data_item?.nlp_outputs??[])[data_idx_control__nlp_idx];
-  };
+  }, [data_item?.nlp_outputs, data_idx_control__nlp_idx]);
 
   const set_content = (content) => {
     console.log(content);
@@ -226,14 +226,15 @@ export default function FileReaderDemo() {
       vNode('div', {className: "my-1 hstack gap-1"}, [
         vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_previous_nlp_idx()}, }, "上一个片段"),
         vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_next_nlp_idx()}, }, "下一个片段"),
-        // vNode('span', {}, `${compute_nlp_data()?.text??"<未知内容>"}`),
+        // vNode('span', {}, `${nlp_data?.text??"<未知内容>"}`),
       ]),
     ]),
+    nlp_data==null ? null :
     vNode(MyViewPanelGroup, {
-      data: compute_nlp_data(),
-      key: compute_nlp_data()?.text,
+      data: nlp_data,
+      key: nlp_data?.text,
     }),
-    // vNode('div', {className: "my-2"}, [`${JSON.stringify(compute_nlp_data())}`]),
+    // vNode('div', {className: "my-2"}, [`${JSON.stringify(nlp_data)}`]),
     // vNode('div', {className: "my-2"}, [`${JSON.stringify(data_list)}`]),
   ]);
 };

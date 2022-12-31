@@ -26,6 +26,10 @@ const routes = [
         path: "file-reader",
         element: vNode(FileReaderDemo),
       },
+      {
+        path: "",
+        element: vNode(FileReaderDemo),
+      },
     ]
   },
 ];
