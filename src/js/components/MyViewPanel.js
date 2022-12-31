@@ -133,8 +133,9 @@ export default function MyViewPanel(props) {
           "btn btn-sm",
           "btn-outline-secondary",
         ].join(" "),
-        onClick: ()=>{
-          myVis.init();
+        onClick: async()=>{
+          await myVis.clean();
+          await myVis.init();
           set_alt("");
         },
       }, "重新绘制"),

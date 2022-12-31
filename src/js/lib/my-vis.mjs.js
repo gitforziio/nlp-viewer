@@ -232,6 +232,11 @@ const MyVis = class MyVis {
     this.data = wrap?.data ?? {};
   }
 
+  async clean() {
+    const elementId = this.config.elementId;
+    d3.select(`#${elementId}`).selectAll(`svg`).remove();
+  }
+
   async init() {
     const cfgSlct = MyVis.configSelection;
     const d3 = MyVis.D3;
