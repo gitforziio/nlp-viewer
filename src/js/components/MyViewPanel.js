@@ -68,13 +68,13 @@ export default function MyViewPanel(props) {
 
   return vNode('div', {
     className: [
-      "p-2",
+      "my-2 p-2",
       "bg-white",
       "border border-1 rounded",
       "overflow-auto",
     ].join(" ")
   }, [
-    vNode('div', {className: "diagram-wrap my-3"}, [
+    vNode('div', {className: "diagram-wrap my-2"}, [
       vNode('div', {}, [
         alt?.length ? vNode('div', {
           className: "text-muted text-center",
@@ -118,7 +118,7 @@ export default function MyViewPanel(props) {
         })
       ]),
     ]),
-    vNode('div', {className: "hstack gap-1"}, [
+    vNode('div', {className: "hstack gap-1 justify-content-center"}, [
       vNode('button', {
         type: "button",
         className: [

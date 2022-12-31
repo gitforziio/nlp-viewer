@@ -135,7 +135,7 @@ export default function FileReaderDemo() {
       set__data_idx_control__main_idx(main_idx-1);
       set_data_item(data_list?.[main_idx-1]);
       set__data_idx_control__nlp_idx(0);
-    };
+    } else {MessagePlugin.info("没有啦");};
   };
   const go_next_item = () => {
     console.log("FLAG1");
@@ -145,7 +145,7 @@ export default function FileReaderDemo() {
       set__data_idx_control__main_idx(main_idx+1);
       set_data_item(data_list?.[main_idx+1]);
       set__data_idx_control__nlp_idx(0);
-    };
+    } else {MessagePlugin.info("没有啦");};
     console.log("FLAG2");
   };
   const go_previous_nlp_idx = () => {
@@ -153,14 +153,14 @@ export default function FileReaderDemo() {
     const nlp_idx = data_idx_control__nlp_idx??0;
     if (nlp_idx > min_idx) {
       set__data_idx_control__nlp_idx(nlp_idx-1);
-    };
+    } else {MessagePlugin.info("没有啦");};
   };
   const go_next_nlp_idx = () => {
     const max_idx = (data_item?.nlp_outputs?.length??0)-1;
     const nlp_idx = data_idx_control__nlp_idx??0;
     if (nlp_idx < max_idx) {
       set__data_idx_control__nlp_idx(nlp_idx+1);
-    };
+    } else {MessagePlugin.info("没有啦");};
   };
 
   const onSuccess = (context) => {
@@ -193,6 +193,7 @@ export default function FileReaderDemo() {
   return vNode('div', null, [
     vNode('div', {className: "my-2"}, [
       vNode(Upload, {
+        // className: "mx-auto",
         theme: theme,
         autoUpload: autoUpload,
         multiple: multiple,
@@ -207,6 +208,8 @@ export default function FileReaderDemo() {
         onSuccess: onSuccess,
       }),
     ]),
+
+    (!data_list?.length) ? null :
     vNode('div', {className: "my-2"}, [
       vNode('div', {className: "my-1 hstack gap-1"}, [
       ]),
@@ -229,6 +232,7 @@ export default function FileReaderDemo() {
         // vNode('span', {}, `${nlp_data?.text??"<未知内容>"}`),
       ]),
     ]),
+
     nlp_data==null ? null :
     vNode(MyViewPanelGroup, {
       data: nlp_data,
