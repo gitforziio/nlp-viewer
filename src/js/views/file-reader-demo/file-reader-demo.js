@@ -6,8 +6,12 @@ import {
   Menu,
   Row,
   Col,
-  Button,
   Space,
+  Button,
+  Select,
+  Checkbox,
+  TagInput,
+  InputNumber,
   Upload,
   MessagePlugin,
 } from "../../../../vendor/tdesign.min.js";
@@ -23,10 +27,9 @@ function getCurrentDate(needTime = false) {
 };
 
 export default function FileReaderDemo() {
-  const [files, setFiles] = useState([]);
-  const [autoUpload, setAutoUpload] = useState(true);
-  const [multiple, setMultiple] = useState(false);
-  const [theme, setTheme] = useState('file');  // file | file-flow
+  const [files, set_files] = useState([]);
+
+  const [theTags, set_theTags] = useState([]);
 
   const [current_file_info, set__current_file_info] = useState({});
 
@@ -53,7 +56,7 @@ export default function FileReaderDemo() {
         const fileReader = new FileReader();
 
         fileReader.onload = (event) => {
-          console.log('fileReader onload');
+          // console.log('fileReader onload');
           // console.log(fileReader.result);
           resolve({
             status: 'success',
@@ -118,37 +121,51 @@ export default function FileReaderDemo() {
 
 
   const [data_list, set_data_list] = useState([]);
-  const [data_item, set_data_item] = useState({});
   const [data_idx_control__main_idx, set__data_idx_control__main_idx] = useState(0);
   const [data_idx_control__nlp_idx, set__data_idx_control__nlp_idx] = useState(0);
+  const data_item = useMemo(()=>{
+    return data_list?.[data_idx_control__main_idx??0]
+  }, [data_list, data_idx_control__main_idx]);
   const nlp_data = useMemo(()=>{
     return (data_item?.nlp_outputs??[])[data_idx_control__nlp_idx];
   }, [data_item?.nlp_outputs, data_idx_control__nlp_idx]);
 
   const set_content = (content) => {
-    console.log(content);
+    // console.log(content);
     set_data_list(content);
-    set_data_item(content?.[data_idx_control__main_idx??0]);
+  };
+  const go_nth_item = (idx) => {
+    const min_idx = 0;
+    const max_idx = (data_list?.length??0)-1;
+    if (idx >= min_idx && idx <= max_idx) {
+      if (data_idx_control__main_idx!=idx) {
+        set__data_idx_control__main_idx(idx);
+        set__data_idx_control__nlp_idx(0);
+        return true;
+      };
+      MessagePlugin.info("无变化");
+      return false;
+    };
+    MessagePlugin.info("超出范围了");
+    return false;
   };
   const go_previous_item = () => {
-    const min_idx = 0;
+    // const min_idx = 0;
     const main_idx = data_idx_control__main_idx??0;
-    if (main_idx > min_idx) {
-      set__data_idx_control__main_idx(main_idx-1);
-      set_data_item(data_list?.[main_idx-1]);
-      set__data_idx_control__nlp_idx(0);
-    } else {MessagePlugin.info("没有啦");};
+    go_nth_item(main_idx-1);
+    // if (main_idx > min_idx) {
+    //   set__data_idx_control__main_idx(main_idx-1);
+    //   set__data_idx_control__nlp_idx(0);
+    // } else {MessagePlugin.info("没有啦");};
   };
   const go_next_item = () => {
-    console.log("FLAG1");
-    const max_idx = (data_list?.length??0)-1;
+    // const max_idx = (data_list?.length??0)-1;
     const main_idx = data_idx_control__main_idx??0;
-    if (main_idx < max_idx) {
-      set__data_idx_control__main_idx(main_idx+1);
-      set_data_item(data_list?.[main_idx+1]);
-      set__data_idx_control__nlp_idx(0);
-    } else {MessagePlugin.info("没有啦");};
-    console.log("FLAG2");
+    go_nth_item(main_idx+1);
+    // if (main_idx < max_idx) {
+    //   set__data_idx_control__main_idx(main_idx+1);
+    //   set__data_idx_control__nlp_idx(0);
+    // } else {MessagePlugin.info("没有啦");};
   };
   const go_previous_nlp_idx = () => {
     const min_idx = 0;
@@ -166,9 +183,9 @@ export default function FileReaderDemo() {
   };
 
   const onSuccess = (context) => {
-    console.log('context keys\n', Object.keys(context));
-    console.log('context\n', context);
-    console.log('context?.file\n', context?.file);
+    // console.log('context keys\n', Object.keys(context));
+    // console.log('context\n', context);
+    // console.log('context?.file\n', context?.file);
     const textContent = context?.response?.textContent;
     if (!textContent?.length) {
       MessagePlugin.error('加载失败: 没有文本内容');
@@ -182,7 +199,7 @@ export default function FileReaderDemo() {
         name: context?.file?.name,
         fidx: json_content?.[0]?.fidx,
       };
-      console.log("new_file_info", new_file_info);
+      // console.log("new_file_info", new_file_info);
       set__current_file_info(new_file_info);
     };
 
@@ -209,19 +226,19 @@ export default function FileReaderDemo() {
 
   return vNode('div', null, [
     vNode('div', {className: "my-4"}, [
-      vNode('h4', {}, "文件"),
+      vNode('h4', {className: "mb-3"}, "文件"),
       vNode(Upload, {
         // className: "mx-auto",
-        theme: theme,
-        autoUpload: autoUpload,
-        multiple: multiple,
+        theme: 'file',  // file | file-flow
+        autoUpload: true,
+        multiple: false,
         data: { extraData: 123, fileName: 'certificate' },
         draggable: true,
         action: null,
         requestMethod: requestMethod,
         files: files,
         formatResponse: formatResponse,
-        onChange: setFiles,
+        onChange: set_files,
         onFail: onFail,
         onSuccess: onSuccess,
       }),
@@ -247,9 +264,18 @@ export default function FileReaderDemo() {
 
     (!data_list?.length) ? null :
     vNode('div', {className: "my-4"}, [
-      vNode('h4', {}, "当前条目"),
+      vNode('h4', {className: "mb-3"}, "当前条目"),
       vNode('div', {className: "my-1 hstack gap-1"}, [
         vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_previous_item()}, }, "上一条"),
+        vNode(InputNumber, {
+          theme: "normal", size: "small", align: "right",
+          style: { width: 160, },
+          placeholder: null,
+          defaultValue: (1+(+data_idx_control__main_idx)),
+          value: (1+(+data_idx_control__main_idx)),
+          onChange: (nv)=>{go_nth_item(nv-1)},
+          label: "第", suffix: `条/共${data_list?.length??0}条`,
+        }),
         vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_next_item()}, }, "下一条"),
       ]),
       vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
@@ -266,6 +292,40 @@ export default function FileReaderDemo() {
         data_item?.sidx==null ? null : [
           vNode('span', {className: "fw-bold text-muted"}, "手工编号"),
           data_item.sidx,
+        ],
+      ]),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        false ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "标签"),
+          vNode(Select, {
+            multiple: true,
+            filterable: true,
+            creatable: true,
+            clearable: true,
+            options: theTags.map(tag=>({label: tag, value: tag})),
+            value: (data_item?.tags??[]),
+            defaultValue: (data_item?.tags??[]),
+            onChange: (new_tag_list)=>{
+              // console.log(new_tag_list);
+              const the_data_list = data_list;
+              the_data_list[data_idx_control__main_idx].tags = [...new_tag_list];
+              set_data_list([...the_data_list]);
+            },
+            onCreate: (new_tags)=>{
+              set_theTags([...new_tags]);
+            },
+          }),
+          vNode(Checkbox.Group, {
+            options: theTags.map(tag=>({label: tag, value: tag})),
+            value: (data_item?.tags??[]),
+            defaultValue: (data_item?.tags??[]),
+            onChange: (new_tag_list)=>{
+              // console.log(new_tag_list);
+              const the_data_list = data_list;
+              the_data_list[data_idx_control__main_idx].tags = [...new_tag_list];
+              set_data_list([...the_data_list]);
+            },
+          }),
         ],
       ]),
       vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
@@ -287,9 +347,10 @@ export default function FileReaderDemo() {
 
     nlp_data==null ? null :
     vNode('div', {className: "my-4"}, [
-      vNode('h4', {}, "当前片段"),
+      vNode('h4', {className: "mb-3"}, "当前片段"),
       vNode('div', {className: "my-1 hstack gap-1"}, [
         vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_previous_nlp_idx()}, }, "上一个"),
+        vNode('span', {}, `第${(1+(+data_idx_control__nlp_idx))}个/共${data_item?.nlp_outputs?.length??0}个`),
         vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_next_nlp_idx()}, }, "下一个"),
       ]),
       vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
@@ -306,6 +367,41 @@ export default function FileReaderDemo() {
         nlp_data?.frag_idx==null ? null : [
           vNode('span', {className: "fw-bold text-muted"}, "手工编号"),
           nlp_data.frag_idx,
+        ],
+      ]),
+
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        false ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "标签"),
+          vNode(Select, {
+            multiple: true,
+            filterable: true,
+            creatable: true,
+            clearable: true,
+            options: theTags.map(tag=>({label: tag, value: tag})),
+            value: (nlp_data?.tags??[]),
+            defaultValue: (nlp_data?.tags??[]),
+            onChange: (new_tag_list)=>{
+              // console.log(new_tag_list);
+              const the_data_list = data_list;
+              the_data_list[data_idx_control__main_idx].nlp_outputs[data_idx_control__nlp_idx].tags = [...new_tag_list];
+              set_data_list([...the_data_list]);
+            },
+            onCreate: (new_tags)=>{
+              set_theTags([...new_tags]);
+            },
+          }),
+          vNode(Checkbox.Group, {
+            options: theTags.map(tag=>({label: tag, value: tag})),
+            value: (nlp_data?.tags??[]),
+            defaultValue: (nlp_data?.tags??[]),
+            onChange: (new_tag_list)=>{
+              // console.log(new_tag_list);
+              const the_data_list = data_list;
+              the_data_list[data_idx_control__main_idx].nlp_outputs[data_idx_control__nlp_idx].tags = [...new_tag_list];
+              set_data_list([...the_data_list]);
+            },
+          }),
         ],
       ]),
 
