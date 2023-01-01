@@ -28,6 +28,8 @@ export default function FileReaderDemo() {
   const [multiple, setMultiple] = useState(false);
   const [theme, setTheme] = useState('file');  // file | file-flow
 
+  const [current_file_info, set__current_file_info] = useState({});
+
   const requestMethod = async (file_or_files) => {
     // 自定义加载方法。
     // 返回值 status 表示加载成功或失败，error 或 response.error 表示加载失败的原因，response 表示请求加载成功后的返回数据，response.url 表示加载成功后的图片地址。
@@ -164,23 +166,38 @@ export default function FileReaderDemo() {
   };
 
   const onSuccess = (context) => {
-    // console.log('context\n', context);
+    console.log('context keys\n', Object.keys(context));
+    console.log('context\n', context);
+    console.log('context?.file\n', context?.file);
     const textContent = context?.response?.textContent;
     if (!textContent?.length) {
       MessagePlugin.error('加载失败: 没有文本内容');
       return;
     };
     let jsonContent;
+
+    const pro = (json_content) => {
+      set_content(json_content);
+      const new_file_info = {
+        name: context?.file?.name,
+        fidx: json_content?.[0]?.fidx,
+      };
+      console.log("new_file_info", new_file_info);
+      set__current_file_info(new_file_info);
+    };
+
     try {
       jsonContent = JSON.parse(textContent);
       if (!Array.isArray(jsonContent)) {jsonContent = [jsonContent]};
-      set_content(jsonContent);
+      pro(jsonContent);
+
       MessagePlugin.success('加载成功 (json)');
       return;
     } catch (json_error) {
       try {
         jsonContent = textContent.split("\n").filter(it=>it.length).map(it=>JSON.parse(it));
-        set_content(jsonContent);
+        pro(jsonContent);
+
         MessagePlugin.success('加载成功 (jsonlines)');
         return;
       } catch (jsonlines_error) {
@@ -191,7 +208,8 @@ export default function FileReaderDemo() {
   };
 
   return vNode('div', null, [
-    vNode('div', {className: "my-2"}, [
+    vNode('div', {className: "my-4"}, [
+      vNode('h4', {}, "文件"),
       vNode(Upload, {
         // className: "mx-auto",
         theme: theme,
@@ -207,37 +225,99 @@ export default function FileReaderDemo() {
         onFail: onFail,
         onSuccess: onSuccess,
       }),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        current_file_info?.name==null ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "文件名"),
+          current_file_info.name,
+        ],
+      ]),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        current_file_info?.fidx==null ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "手工编号"),
+          current_file_info.fidx,
+        ],
+      ]),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        (!data_list?.length) ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "条目数量"),
+          data_list.length,
+        ],
+      ]),
     ]),
 
     (!data_list?.length) ? null :
-    vNode('div', {className: "my-2"}, [
+    vNode('div', {className: "my-4"}, [
+      vNode('h4', {}, "当前条目"),
       vNode('div', {className: "my-1 hstack gap-1"}, [
+        vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_previous_item()}, }, "上一条"),
+        vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_next_item()}, }, "下一条"),
       ]),
-      vNode('div', {className: "my-1 hstack gap-1"}, [
-        vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_previous_item()}, }, "上一个动作"),
-        vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_next_item()}, }, "下一个动作"),
-        vNode('span', {}, `${data_item?.head??"<未知动作>"}`),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        data_item?.head==null ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "标题"),
+          vNode('code', {}, data_item.head),
+        ],
+      ]),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        vNode('span', {className: "fw-bold text-muted"}, "序号"),
+        (1+(+data_idx_control__main_idx)),
+      // ]),
+      // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        data_item?.sidx==null ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "手工编号"),
+          data_item.sidx,
+        ],
+      ]),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        vNode('span', {className: "fw-bold text-muted"}, "各文本片段"),
       ]),
       vNode('div', {className: "my-1 hstack gap-1 flex-wrap"}, (data_item?.nlp_outputs??[]).map((nlp_item, idx)=>vNode('button', {
         type: "button",
         className: [
           "btn btn-sm",
-          idx==data_idx_control__nlp_idx?"btn-primary":"btn-light"
+          idx==data_idx_control__nlp_idx?"btn-outline-primary":"btn-light"
         ].join(" "),
         onClick: ()=>{set__data_idx_control__nlp_idx(idx);},
-      }, nlp_item?.text??"<无内容>"))),
-      vNode('div', {className: "my-1 hstack gap-1"}, [
-        vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_previous_nlp_idx()}, }, "上一个片段"),
-        vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_next_nlp_idx()}, }, "下一个片段"),
-        // vNode('span', {}, `${nlp_data?.text??"<未知内容>"}`),
-      ]),
+      }, [
+        nlp_item?.frag_idx==null ? null : vNode('span', {}, `[${nlp_item?.frag_idx}]`),
+        vNode('span', {}, `${nlp_item?.text??"<无内容>"}`),
+        // nlp_item?.text??"<无内容>",
+      ]))),
     ]),
 
     nlp_data==null ? null :
-    vNode(MyViewPanelGroup, {
-      data: nlp_data,
-      key: nlp_data?.text,
-    }),
+    vNode('div', {className: "my-4"}, [
+      vNode('h4', {}, "当前片段"),
+      vNode('div', {className: "my-1 hstack gap-1"}, [
+        vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_previous_nlp_idx()}, }, "上一个"),
+        vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_next_nlp_idx()}, }, "下一个"),
+      ]),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        nlp_data?.text==null ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "内容"),
+          vNode('code', {}, nlp_data.text),
+        ],
+      ]),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        vNode('span', {className: "fw-bold text-muted"}, "序号"),
+        (1+(+data_idx_control__nlp_idx)),
+      // ]),
+      // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        nlp_data?.frag_idx==null ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "手工编号"),
+          nlp_data.frag_idx,
+        ],
+      ]),
+
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        vNode('span', {className: "fw-bold text-muted"}, "结构可视化"),
+      ]),
+      vNode(MyViewPanelGroup, {
+        data: nlp_data,
+        key: `[${data_idx_control__main_idx}][${data_idx_control__nlp_idx}]${nlp_data?.text}`,
+      }),
+    ]),
+
     // vNode('div', {className: "my-2"}, [`${JSON.stringify(nlp_data)}`]),
     // vNode('div', {className: "my-2"}, [`${JSON.stringify(data_list)}`]),
   ]);

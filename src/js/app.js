@@ -5,7 +5,7 @@ import Home from "./views/home/home.js";
 import ErrorPage from "./views/error-page/error-page.js";
 import PageNotFound from "./views/404/404.js";
 import RealTimeDemo from "./views/real-time-demo/real-time-demo.js";
-import FileReaderDemo from "./views/file-reader/file-reader.js";
+import FileReaderDemo from "./views/file-reader-demo/file-reader-demo.js";
 import { ThemeContext, themes } from "./utils/theme.js";
 
 const routes = [
@@ -23,7 +23,7 @@ const routes = [
         element: vNode(RealTimeDemo),
       },
       {
-        path: "file-reader",
+        path: "file-reader-demo",
         element: vNode(FileReaderDemo),
       },
       {

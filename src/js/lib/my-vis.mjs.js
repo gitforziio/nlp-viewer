@@ -364,7 +364,7 @@ const MyVis = class MyVis {
     this.svg.call(zoom_fn.transform, MyVis.D3.zoomIdentity);
     this.zoom = zoom_fn;
 
-    d3.select(`#${elementId}`).node().append(this.svg.node());
+    await d3.select(`#${elementId}`).node().append(this.svg.node());
     this.draw();
 
   }  // end init

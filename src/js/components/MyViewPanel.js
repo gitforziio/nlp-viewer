@@ -1,6 +1,7 @@
 import { createElement as vNode, useState, useEffect } from "../../../vendor/react.js";
 import MyVis from "../lib/my-vis.mjs.js";
 import {
+  Tooltip,
   MessagePlugin,
 } from "../../../vendor/tdesign.min.js";
 
@@ -36,6 +37,7 @@ export default function MyViewPanel(props) {
       &&(myVis?.data?.spans?.length??0)<20
       &&(myVis?.data?.nodes?.length??0)<40
     ) {
+      myVis.clean();
       myVis.init();
       set_alt("");
     } else {
@@ -63,6 +65,8 @@ export default function MyViewPanel(props) {
 
   // }, [myVis.data, myVis.config.elementId]);
 
+  const [theVis, set_theVis] = useState(myVis);
+
 
 
 
@@ -76,9 +80,6 @@ export default function MyViewPanel(props) {
   }, [
     vNode('div', {className: "diagram-wrap my-2"}, [
       vNode('div', {}, [
-        alt?.length ? vNode('div', {
-          className: "text-muted text-center",
-        }, alt) : null,
         vNode('diagram', {
           id: elementId, className: "diagram",
           // onClick: ()=>{
@@ -115,19 +116,35 @@ export default function MyViewPanel(props) {
           //   MessagePlugin.info('onResize');
           //   // console.log("onResize");
           // },
-        })
+        }),
+        vNode('div', {
+          className: [
+            "text-muted text-center",
+            alt?.length ? "--d-none" : "d-none",
+          ].join(" "),
+        }, alt),
       ]),
     ]),
     vNode('div', {className: "hstack gap-1 justify-content-center"}, [
-      vNode('button', {
+      vNode(Tooltip, {
+        content: "在图中拖拽或缩放之后，重新调整到合适的布局",
+      }, vNode('button', {
         type: "button",
         className: [
           "btn btn-sm",
           "btn-outline-secondary",
         ].join(" "),
-        onClick: ()=>{myVis.resize();},
-      }, "调整布局"),
-      vNode('button', {
+        onClick: ()=>{
+          // console.log(myVis);
+          // console.log(myVis?.svg_g_root);
+          // console.log(theVis);
+          // console.log(theVis?.svg_g_root);
+          theVis.resize();
+        },
+      }, "调整布局")),
+      vNode(Tooltip, {
+        content: "重新绘制整个图形",
+      }, vNode('button', {
         type: "button",
         className: [
           "btn btn-sm",
@@ -137,8 +154,11 @@ export default function MyViewPanel(props) {
           await myVis.clean();
           await myVis.init();
           set_alt("");
+          // console.log(myVis);
+          // console.log(myVis?.svg_g_root);
+          set_theVis(myVis);
         },
-      }, "重新绘制"),
+      }, "重新绘制")),
     ]),
   ]);
 };

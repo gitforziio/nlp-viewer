@@ -208,13 +208,41 @@ export function formatter_Dep_FastHan(item, idx, wrap) {
 };
 
 
-
+const ref_info_dict = {
+  'amr': {
+    link: "https://github.com/amrisi/amr-guidelines/blob/master/amr.md",
+  },
+  'hanlp-con': {
+    link: "https://hanlp.hankcs.com/docs/annotations/constituency/index.html",
+  },
+  'stanza-con': {
+    link: "https://stanfordnlp.github.io/stanza/constituency.html",
+  },
+  'hanlp-dep-pmt': {
+    link: "https://hanlp.hankcs.com/docs/annotations/dep/pmt.html",
+  },
+  'hanlp-dep-sd': {
+    link: "https://hanlp.hankcs.com/docs/annotations/dep/index.html",
+  },
+  'hanlp-dep-ud': {
+    link: "https://hanlp.hankcs.com/docs/annotations/dep/ud.html",
+  },
+  'fasthan-dep': {
+    link: "https://github.com/fastnlp/fastHan/blob/master/README.md?plain=1#L167",
+  },
+  'ltp-dep': {
+    link: "http://ltp.ai/docs/appendix.html#id5",
+  },
+  'ltp-sdp': {
+    link: "http://ltp.ai/docs/appendix.html#id6",
+  },
+};
 
 
 export function formatter_All(view_data) {
   const list_ = [];
 
-  const step = (data, byWho, tag, list, header, formatter_fn) => {
+  const step = (data, byWho, tag, list, header, formatter_fn, ref_info) => {
     if (data?.[byWho]?.[tag] != null) {
       list.push({
         header: header,
@@ -223,22 +251,23 @@ export function formatter_All(view_data) {
           data: formatter_fn(detail_item, detail_idx, data),
           elementId: `diagram-${byWho}-${tag.split("/").join("-")}-${detail_idx}`,
         })),
+        ref_info: ref_info ?? null,
       });
     };
   };
 
-  step(view_data, 'by_hanlp', 'amr', list_, 'AMR by HanLP', formatter_AMR_HanLP);
+  step(view_data, 'by_hanlp', 'amr', list_, 'AMR by HanLP', formatter_AMR_HanLP, ref_info_dict['amr']);
 
-  step(view_data, 'by_hanlp', 'con/full', list_, 'Con.(full) by HanLP', formatter_Con_HanLP);
-  step(view_data, 'by_hanlp', 'con/major', list_, 'Con.(major) by HanLP', formatter_Con_HanLP);
-  step(view_data, 'by_stanza', 'con', list_, 'Con. by Stanza', formatter_Con_Stanza);
+  step(view_data, 'by_hanlp', 'con/full', list_, 'Con.(CTB full) by HanLP', formatter_Con_HanLP, ref_info_dict['hanlp-con']);
+  step(view_data, 'by_hanlp', 'con/major', list_, 'Con.(CTB major) by HanLP', formatter_Con_HanLP, ref_info_dict['hanlp-con']);
+  step(view_data, 'by_stanza', 'con', list_, 'Con. by Stanza', formatter_Con_Stanza, ref_info_dict['stanza-con']);
 
-  step(view_data, 'by_hanlp', 'dep/PMT', list_, 'Dep.(PMT) by HanLP', (it, idx, da)=>formatter_Dep_HanLP(it, idx, da, "PMT"));
-  step(view_data, 'by_hanlp', 'dep/SD', list_, 'Dep.(SD) by HanLP', (it, idx, da)=>formatter_Dep_HanLP(it, idx, da, "SD"));
-  step(view_data, 'by_hanlp', 'dep/UD', list_, 'Dep.(UD) by HanLP', (it, idx, da)=>formatter_Dep_HanLP(it, idx, da, "UD"));
-  step(view_data, 'by_fasthan', 'parse', list_, 'Dep. by FastHan', formatter_Dep_FastHan);
-  step(view_data, 'by_ltp', 'dep', list_, 'Dep. by LTP', (it, idx, da)=>formatter_Dep_LTP(it, idx, da, "dep"));
-  step(view_data, 'by_ltp', 'sdp', list_, 's.d.p. by LTP', (it, idx, da)=>formatter_Dep_LTP(it, idx, da, "sdp"));
+  step(view_data, 'by_hanlp', 'dep/PMT', list_, 'Dep.(PMT) by HanLP', (it, idx, da)=>formatter_Dep_HanLP(it, idx, da, "PMT"), ref_info_dict['hanlp-dep-pmt']);
+  step(view_data, 'by_hanlp', 'dep/SD', list_, 'Dep.(SD) by HanLP', (it, idx, da)=>formatter_Dep_HanLP(it, idx, da, "SD"), ref_info_dict['hanlp-dep-sd']);
+  step(view_data, 'by_hanlp', 'dep/UD', list_, 'Dep.(UD) by HanLP', (it, idx, da)=>formatter_Dep_HanLP(it, idx, da, "UD"), ref_info_dict['hanlp-dep-ud']);
+  step(view_data, 'by_fasthan', 'parse', list_, 'Dep.(CTB9) by FastHan', formatter_Dep_FastHan, ref_info_dict['fasthan-dep']);
+  step(view_data, 'by_ltp', 'dep', list_, 'Dep. by LTP', (it, idx, da)=>formatter_Dep_LTP(it, idx, da, "dep"), ref_info_dict['ltp-dep']);
+  step(view_data, 'by_ltp', 'sdp', list_, 's.d.p. by LTP', (it, idx, da)=>formatter_Dep_LTP(it, idx, da, "sdp"), ref_info_dict['ltp-sdp']);
 
   return list_;
 };

@@ -120,6 +120,11 @@ export default function MyViewPanelGroup(props) {
       value: idx+1,
       header: `[${idx+1}] ${wrap.header}`,
       key: idx,
+      headerRightContent: wrap?.ref_info==null ? null : vNode('a', {
+        className: ["fw-normal", "text-decoration-none"].join(" "),
+        target: "_blank",
+        href: wrap?.ref_info?.link ?? wrap?.ref_info?.href ?? `https://cn.bing.com/search?q=${wrap?.ref_info?.text ?? wrap.header}`,
+      }, wrap?.ref_info?.text ?? "参考"),
     }, wrap.items.map(it=>vNode('div', {
       key: it.key,
     }, vNode(MyViewPanel, {
