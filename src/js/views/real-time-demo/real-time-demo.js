@@ -14,16 +14,22 @@ import {
 } from "../../../../vendor/tdesign.min.js";
 
 
-const backendNLP = async (text, href) => {
+function timeout(duration = 0) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => reject(new Error(`timed out (${(duration/1000).toFixed(2)}s)`)), duration);
+  });
+};
+
+const backendNLP = async (text, href, timeoutDuration=30000) => {
   const data = { text: text, };
 
-  const result = await fetch(`${href}/api/nlp`, {
+  const result = await Promise.race([fetch(`${href}/api/nlp`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
-  })
+  }), timeout(timeoutDuration)])
   .then(response => response.json())
   .then(json_data => {
     // console.log('Success:', json_data);
@@ -85,7 +91,7 @@ export default function RealTimeDemo() {
             onClick: async(event)=>{
               console.log(event);
               set_is_checking(true);
-              const result = await backendNLP("测试", backend_href);
+              const result = await backendNLP("测试", backend_href, 8000);
               if (result?.error) {
                 MessagePlugin.error(`发生错误：${result?.error}`);
                 console.log(result);
@@ -95,7 +101,18 @@ export default function RealTimeDemo() {
               };
               set_is_checking(false);
             },
-          }, is_checking ? "稍等" : "测试"),
+          }, is_checking ? vNode('span', {
+            // className: "d-inline-flex hstack gap-1",
+          }, [
+            vNode('span', {
+              className: "spinner-border spinner-border-sm me-1",
+              role: "status",
+              'aria-hidden': "true",
+            }, [
+              vNode('span', {className: "visually-hidden"}, "稍等"),
+            ]),
+            vNode('span', {}, "稍等"),
+          ]) : "测试"),
         ]),
       ]),
     ]),
@@ -150,7 +167,18 @@ export default function RealTimeDemo() {
               };
               set_is_processing(false);
             },
-          }, is_processing ? "稍等" : "分析"),
+          }, is_processing ? vNode('span', {
+            // className: "d-inline-flex hstack gap-1",
+          }, [
+            vNode('span', {
+              className: "spinner-border spinner-border-sm me-1",
+              role: "status",
+              'aria-hidden': "true",
+            }, [
+              vNode('span', {className: "visually-hidden"}, "稍等"),
+            ]),
+            vNode('span', {}, "稍等"),
+          ]) : "分析"),
         ])
       ]),
     ]),

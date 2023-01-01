@@ -1,8 +1,9 @@
-import { createElement as vNode, useState, useEffect } from "../../../vendor/react.js";
+import { createElement as vNode, useState, useEffect, useRef } from "../../../vendor/react.js";
 import MyVis from "../lib/my-vis.mjs.js";
 import {
   Tooltip,
   MessagePlugin,
+  DialogPlugin,
 } from "../../../vendor/tdesign.min.js";
 
 export default function MyViewPanel(props) {
@@ -67,6 +68,7 @@ export default function MyViewPanel(props) {
 
   const [theVis, set_theVis] = useState(myVis);
 
+  const theSVG = useRef(null);
 
 
 
@@ -127,22 +129,6 @@ export default function MyViewPanel(props) {
     ]),
     vNode('div', {className: "hstack gap-1 justify-content-center"}, [
       vNode(Tooltip, {
-        content: "在图中拖拽或缩放之后，重新调整到合适的布局",
-      }, vNode('button', {
-        type: "button",
-        className: [
-          "btn btn-sm",
-          "btn-outline-secondary",
-        ].join(" "),
-        onClick: ()=>{
-          // console.log(myVis);
-          // console.log(myVis?.svg_g_root);
-          // console.log(theVis);
-          // console.log(theVis?.svg_g_root);
-          theVis.resize();
-        },
-      }, "调整布局")),
-      vNode(Tooltip, {
         content: "重新绘制整个图形",
       }, vNode('button', {
         type: "button",
@@ -159,6 +145,92 @@ export default function MyViewPanel(props) {
           set_theVis(myVis);
         },
       }, "重新绘制")),
+      vNode(Tooltip, {
+        content: "在图中拖拽或缩放之后，重新调整到合适的布局",
+      }, vNode('button', {
+        type: "button",
+        className: [
+          "btn btn-sm",
+          "btn-outline-secondary",
+        ].join(" "),
+        onClick: ()=>{
+          // console.log(myVis);
+          // console.log(myVis?.svg_g_root);
+          // console.log(theVis);
+          // console.log(theVis?.svg_g_root);
+          theVis.resize();
+        },
+      }, "调整布局")),
+      vNode(Tooltip, {
+        content: "将此图形以SVG格式导出保存",
+      }, vNode('button', {
+        type: "button",
+        className: [
+          "btn btn-sm",
+          "btn-outline-secondary",
+        ].join(" "),
+        onClick: async()=>{
+          MessagePlugin.info("功能待开发");
+          if (theVis?.svg?.node?.()==null) {
+            MessagePlugin.info("请先绘制图形");
+            return;
+          };
+          console.log(elementId);
+          console.log(theVis?.svg?.node?.()?.outerHTML);
+        },
+      }, "导出SVG")),
+      vNode(Tooltip, {
+        content: "查看json格式的数据内容",
+      }, vNode('button', {
+        type: "button",
+        className: [
+          "btn btn-sm",
+          "btn-outline-secondary",
+        ].join(" "),
+        onClick: async()=>{
+          const myDialog = DialogPlugin({
+            width: "80%",
+            header: "查看JSON",
+            body: vNode('div', {
+              className: "",
+            }, [
+              vNode('div', {}, [
+                vNode('textarea', {
+                  className: [
+                    "form-control",
+                    // "form-control-sm",
+                  ].join(" "),
+                  // value: JSON.stringify(props?.data, null, 2),
+                  value: JSON.stringify(props?.data),
+                }),
+              ]),
+            ]),
+            cancelBtn: false,
+            onConfirm: ({ event, trigger }) => {
+              myDialog.hide();
+            },
+            onClose: ({ event, trigger }) => {
+              myDialog.hide();
+            },
+          });
+        },
+      }, "查看JSON")),
+      // vNode(Tooltip, {
+      //   content: "将此图形以PNG格式导出保存",
+      // }, vNode('button', {
+      //   type: "button",
+      //   className: [
+      //     "btn btn-sm",
+      //     "btn-outline-secondary",
+      //   ].join(" "),
+      //   onClick: async()=>{
+      //     MessagePlugin.info("功能待开发");
+      //     if (theVis?.svg?.node?.()==null) {
+      //       MessagePlugin.info("请先绘制图形");
+      //       return;
+      //     };
+      //   },
+      // }, "导出PNG")),
     ]),
   ]);
 };

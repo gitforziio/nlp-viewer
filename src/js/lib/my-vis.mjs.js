@@ -613,22 +613,41 @@ const MyVis = class MyVis {
     };
     things.unitDict = dictBy(things.units, "idx");
 
+    // 计算横向位置
     const rank_dict = {};
-    const rank_fn = (it)=>{
+    const rank_fn = (it, depth=0)=>{
+      // if (depth>2) {
+      //   console.log(depth);
+      // };
+
+      // 如果没有 spans 属性或者 spans 属性的长度为 0，则将 it 的排名设置为 it.od 或 0
       if (!this.things.spans?.length) {
         const rank = it?.od??0;
+        // 将 it 的编号和排名存储到 rank_dict 字典中
         rank_dict[it.idx] = rank;
         it.rank=rank;
         return rank;
       };
+      // 如果 rank_dict 字典中已经有了 it 的编号，则直接使用 it 的排名，不再调用 rank_fn 函数
       if (!!rank_dict?.[it.idx]) {
         const rank = rank_dict[it.idx];
         it.rank=rank;
         return rank;
       };
 
-      const the_spans = [...(it?.ref_spans??[]), ...(it?.clue_spans??[])].map(idx=>this.things.spans.find(span=>span.idx==idx)).filter(xxx=>xxx?.indices?.[0]!=null);
+      // 获取 it 的 ref_spans 和 clue_spans 中的所有 span
+      const the_spans = [
+        ...(it?.ref_spans??[]),
+        ...(it?.clue_spans??[]),
+      ].map(
+        // 根据序号找到具体的 span
+        idx=>this.things.spans.find(span=>span.idx==idx)
+      ).filter(
+        // 确保内容存在 ？
+        xxx=>xxx?.indices?.[0]!=null
+      );
 
+      // 如果 the_spans 不为空，则计算这些 span 的平均排名，作为 it 的排名
       if (the_spans?.length) {
         const rank = Math_avg(...the_spans.map(span=>(span?.indices?.[0])));
         rank_dict[it.idx] = rank;
@@ -636,10 +655,23 @@ const MyVis = class MyVis {
         return rank;
       };
 
+      // 如果 the_spans 为空 说明这玩意儿不对应具体的文本
+
+      // 当 arcs 数组中存在与 it 对应的单元相关的目标单元时，使用这些目标单元的平均排名作为排名。
+      // 获取所有指向 it 的单元的编号
       const target_idxes = arcs.filter(arc=>(arc?.source==it.idx||arc?.source?.idx==it.idx)).map(arc=>arc?.target?.idx??arc?.target);
+      // 计算这些单元的排名，并将它们的平均值作为 it 的排名
       const target_ranks = target_idxes.map(idx=>{
-        if (!!rank_dict?.[idx]) {return rank_dict?.[idx]};
-        return rank_fn(things.unitDict[idx]);
+        // 如果 rank_dict 字典中已经有了某个单元的编号，则直接使用该单元的排名
+        if (!!rank_dict?.[idx]) {
+          return rank_dict?.[idx];
+        };
+        // 如果递归太深，则排名为0
+        if (depth > 20) {
+          return 0;
+        };
+        // 否则，调用 rank_fn 函数来计算该单元的排名
+        return rank_fn(things.unitDict[idx], (depth+1));
       });
       const rank = Math_avg(...target_ranks);
       rank_dict[it.idx] = rank;
