@@ -5,6 +5,41 @@ import {
   MessagePlugin,
   DialogPlugin,
 } from "../../../vendor/tdesign.min.js";
+import { save as saveIt, saveLines, saveText, saveBlob } from "../utils/save.js";
+
+
+// 将 SVG 转换为 PNG
+function svgToPng(svgElement, width, height, callback=((blob)=>{console.log("blob:\n", blob)})) {
+  // 创建一个 canvas 元素
+  var canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  // 将 SVG 内容绘制到 canvas 中
+  var ctx = canvas.getContext('2d');
+  var data = (new XMLSerializer()).serializeToString(svgElement);
+  var DOMURL = window.URL || window.webkitURL || window;
+  var img = new Image();
+  var svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+  var url = DOMURL.createObjectURL(svgBlob);
+  img.onload = function () {
+    ctx.drawImage(img, 0, 0);
+    DOMURL.revokeObjectURL(url);
+  };
+  img.src = url;
+
+  return canvas.toBlob(callback, "image/png");
+
+  // // 使用 canvas.toDataURL() 方法生成 PNG 图像的 data URL
+  // var dataUrl = canvas.toDataURL('image/png');
+  // console.log(dataUrl);
+  // var data = dataUrl.split(',')[1];
+  // console.log(data);
+  // return window.atob(data);
+};
+
+
+
 
 export default function MyViewPanel(props) {
 
@@ -162,24 +197,6 @@ export default function MyViewPanel(props) {
         },
       }, "调整布局")),
       vNode(Tooltip, {
-        content: "将此图形以SVG格式导出保存",
-      }, vNode('button', {
-        type: "button",
-        className: [
-          "btn btn-sm",
-          "btn-outline-secondary",
-        ].join(" "),
-        onClick: async()=>{
-          MessagePlugin.info("功能待开发");
-          if (theVis?.svg?.node?.()==null) {
-            MessagePlugin.info("请先绘制图形");
-            return;
-          };
-          console.log(elementId);
-          console.log(theVis?.svg?.node?.()?.outerHTML);
-        },
-      }, "导出SVG")),
-      vNode(Tooltip, {
         content: "查看json格式的数据内容",
       }, vNode('button', {
         type: "button",
@@ -215,22 +232,44 @@ export default function MyViewPanel(props) {
           });
         },
       }, "查看JSON")),
-      // vNode(Tooltip, {
-      //   content: "将此图形以PNG格式导出保存",
-      // }, vNode('button', {
-      //   type: "button",
-      //   className: [
-      //     "btn btn-sm",
-      //     "btn-outline-secondary",
-      //   ].join(" "),
-      //   onClick: async()=>{
-      //     MessagePlugin.info("功能待开发");
-      //     if (theVis?.svg?.node?.()==null) {
-      //       MessagePlugin.info("请先绘制图形");
-      //       return;
-      //     };
-      //   },
-      // }, "导出PNG")),
+      vNode(Tooltip, {
+        content: "将此图形以SVG格式导出保存",
+      }, vNode('button', {
+        type: "button",
+        className: [
+          "btn btn-sm",
+          "btn-outline-secondary",
+        ].join(" "),
+        onClick: async()=>{
+          // MessagePlugin.info("功能待开发");
+          if (theVis?.svg?.node?.()==null) {
+            MessagePlugin.info("请先绘制图形");
+            return;
+          };
+          saveText(theVis?.svg?.node?.()?.outerHTML, `${elementId}.svg`);
+        },
+      }, "导出SVG")),
+      vNode(Tooltip, {
+        content: "将此图形以PNG格式导出保存",
+      }, vNode('button', {
+        type: "button",
+        className: [
+          "btn btn-sm",
+          "btn-outline-secondary",
+        ].join(" "),
+        onClick: async()=>{
+          MessagePlugin.info("功能待开发");
+          return;
+          if (theVis?.svg?.node?.()==null) {
+            MessagePlugin.info("请先绘制图形");
+            return;
+          };
+          svgToPng(theVis?.svg?.node?.(), theVis?.svg?.attr("width"), theVis?.svg?.attr("height"), (blob)=>{
+            saveBlob(blob, `${elementId}.png`);
+            console.log("png blob\n", blob);
+          });
+        },
+      }, "导出PNG")),
     ]),
   ]);
 };

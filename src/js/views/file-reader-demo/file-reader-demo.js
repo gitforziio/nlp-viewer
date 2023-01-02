@@ -15,6 +15,8 @@ import {
   Upload,
   MessagePlugin,
 } from "../../../../vendor/tdesign.min.js";
+import Lodash from "../../../../vendor/lodash.mjs.js";
+import { save as saveIt, saveLines, saveText, saveBlob } from "../../utils/save.js";
 
 function getCurrentDate(needTime = false) {
   const d = new Date();
@@ -129,6 +131,18 @@ export default function FileReaderDemo() {
   const nlp_data = useMemo(()=>{
     return (data_item?.nlp_outputs??[])[data_idx_control__nlp_idx];
   }, [data_item?.nlp_outputs, data_idx_control__nlp_idx]);
+
+  const nlp_item_num = useMemo(()=>{
+    return Lodash.sum(data_list.map(it=>(it?.nlp_outputs?.length??0)));
+  }, [data_list]);
+
+  const total_char_num = useMemo(()=>{
+    return Lodash.sum(
+      data_list.map(
+        it=>Lodash.sum((it?.nlp_outputs??[]).map(iq=>iq?.text?.length??0))
+      )
+    );
+  }, [data_list]);
 
   const set_content = (content) => {
     // console.log(content);
@@ -259,6 +273,16 @@ export default function FileReaderDemo() {
           vNode('span', {className: "fw-bold text-muted"}, "条目数量"),
           data_list.length,
         ],
+      // ]),
+      // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        (!nlp_item_num) ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "片段数量"),
+          nlp_item_num,
+        ],
+        (!total_char_num) ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "总字符数"),
+          total_char_num,
+        ],
       ]),
     ]),
 
@@ -268,7 +292,7 @@ export default function FileReaderDemo() {
       vNode('div', {className: "my-1 hstack gap-1"}, [
         vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_previous_item()}, }, "上一条"),
         vNode(InputNumber, {
-          theme: "normal", size: "small", align: "right",
+          theme: "normal", size: "small", align: "center",
           style: { width: 160, },
           placeholder: null,
           defaultValue: (1+(+data_idx_control__main_idx)),
@@ -293,6 +317,10 @@ export default function FileReaderDemo() {
           vNode('span', {className: "fw-bold text-muted"}, "手工编号"),
           data_item.sidx,
         ],
+      // ]),
+      // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        vNode('span', {className: "fw-bold text-muted"}, "总字符数"),
+        vNode('span', {}, Lodash.sum((data_item?.nlp_outputs??[]).map(it=>it?.text?.length))),
       ]),
       vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
         false ? null : [
@@ -312,7 +340,8 @@ export default function FileReaderDemo() {
               set_data_list([...the_data_list]);
             },
             onCreate: (new_tags)=>{
-              set_theTags([...new_tags]);
+              const new_theTags= Lodash.uniq([...theTags, ...new_tags]);
+              set_theTags([...new_theTags]);
             },
           }),
           vNode(Checkbox.Group, {
@@ -368,6 +397,12 @@ export default function FileReaderDemo() {
           vNode('span', {className: "fw-bold text-muted"}, "手工编号"),
           nlp_data.frag_idx,
         ],
+      // ]),
+      // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        nlp_data?.text==null ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "字符数"),
+          vNode('span', {}, nlp_data.text?.length),
+        ],
       ]),
 
       vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
@@ -388,7 +423,8 @@ export default function FileReaderDemo() {
               set_data_list([...the_data_list]);
             },
             onCreate: (new_tags)=>{
-              set_theTags([...new_tags]);
+              const new_theTags= Lodash.uniq([...theTags, ...new_tags]);
+              set_theTags([...new_theTags]);
             },
           }),
           vNode(Checkbox.Group, {

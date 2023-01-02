@@ -1235,7 +1235,8 @@ const MyVis = class MyVis {
       .on("mouseenter", event=>{
         const me = d3.select(event.target);
         me.classed("mouse-over", true);
-        me.attr("filter", `url(${new URL(`#svg-filter-shadow`, location)})`)
+        me.attr("filter", `url(#svg-filter-shadow)`);
+        // me.attr("filter", `url(${new URL(`#svg-filter-shadow`, location)})`);
       })
       .on("mouseleave", event=>{
         const me = d3.select(event.target);
@@ -1394,7 +1395,8 @@ const MyVis = class MyVis {
         .attr("stroke-width", 1)
         .attr("stroke", "black")
         .attr("stroke", lk=>_linkTypeToColor(lk))
-        .attr("marker-end", `url(${new URL(`#svg-mark-triangle`, location)})`)
+        .attr("marker-end", `url(#svg-mark-triangle)`)
+        // .attr("marker-end", `url(${new URL(`#svg-mark-triangle`, location)})`)
         .attr("d", lk=>_makeUnitUnitArcFn(lk))
       ;
       const angle = Math.atan((points?.end?.y-points?.start?.y)/(points?.end?.x-points?.start?.x))*180/Math.PI;
@@ -1546,7 +1548,8 @@ const MyVis = class MyVis {
     //     .attr("stroke-width", 1)
     //     .attr("stroke-dasharray", "2 2")
     //     .attr("stroke", lk=>_linkTypeToColor(lk))
-    //     .attr("marker-end", `url(${new URL(`#svg-mark-arrow`, location)})`)
+    //     .attr("marker-end", `url(#svg-mark-arrow)`)
+    //     // .attr("marker-end", `url(${new URL(`#svg-mark-arrow`, location)})`)
     //     .attr("d", lk=>_makeSpanUnitArcFn(lk))
     //   ;
     // };
@@ -1562,7 +1565,8 @@ const MyVis = class MyVis {
     //     .attr("fill", "none")
     //     .attr("stroke-width", 1)
     //     .attr("stroke", "black")
-    //     .attr("marker-end", `url(${new URL(`#svg-mark-triangle`, location)})`)
+    //     .attr("marker-end", `url(#svg-mark-triangle)`)
+    //     // .attr("marker-end", `url(${new URL(`#svg-mark-triangle`, location)})`)
     //     .attr("d", lk=>_makeUnitUnitArcFn(lk))
     //   ;
     //   const label_x = isNaN(points?.mid?.x) ? 0 : (points?.mid?.x??0);
