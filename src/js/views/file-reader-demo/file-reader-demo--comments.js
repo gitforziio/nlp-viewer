@@ -66,6 +66,10 @@ export default function FileReaderDemoComments(props) {
       !editing ? vNode('div', {}, vNode(Button, {
         theme: "default", size: "small",
         onClick: ()=>{
+          if (!props?.userName?.length) {
+            MessagePlugin.warning("请先设置用户名！");
+            return;
+          };
           set_boxContent("");
           set_editing(true);
         },
@@ -80,6 +84,14 @@ export default function FileReaderDemoComments(props) {
         vNode('div', {}, vNode(Button, {
           theme: "default", size: "small",
           onClick: ()=>{
+            if (!props?.userName?.length) {
+              MessagePlugin.warning("请先设置用户名！");
+              return;
+            };
+            if (!boxContent?.length) {
+              MessagePlugin.warning("请先填写内容！");
+              return;
+            };
             const the_comments = [...(props?.comments??[])];
             the_comments.push({
               user: { userName: props?.userName, },
