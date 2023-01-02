@@ -260,14 +260,14 @@ export default function MyViewPanel(props) {
         onClick: async()=>{
           MessagePlugin.info("功能待开发");
           return;
-          if (theVis?.svg?.node?.()==null) {
-            MessagePlugin.info("请先绘制图形");
-            return;
-          };
-          svgToPng(theVis?.svg?.node?.(), theVis?.svg?.attr("width"), theVis?.svg?.attr("height"), (blob)=>{
-            saveBlob(blob, `${elementId}.png`);
-            console.log("png blob\n", blob);
-          });
+          // if (theVis?.svg?.node?.()==null) {
+          //   MessagePlugin.info("请先绘制图形");
+          //   return;
+          // };
+          // svgToPng(theVis?.svg?.node?.(), theVis?.svg?.attr("width"), theVis?.svg?.attr("height"), (blob)=>{
+          //   saveBlob(blob, `${elementId}.png`);
+          //   console.log("png blob\n", blob);
+          // });
         },
       }, "导出PNG")),
     ]),

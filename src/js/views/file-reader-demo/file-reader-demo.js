@@ -1,4 +1,4 @@
-import { createElement as vNode, Fragment, useState, useMemo } from "../../../../vendor/react.js";
+import { createElement as vNode, Fragment, useState, useMemo, useEffect } from "../../../../vendor/react.js";
 // import ReactRouterDom from "../../../../vendor/react-router-dom.js";
 import MyViewPanelGroup from "../../components/MyViewPanelGroup.js";
 import {
@@ -7,16 +7,21 @@ import {
   Row,
   Col,
   Space,
+  Tooltip,
   Button,
   Select,
   Checkbox,
+  Input,
   TagInput,
   InputNumber,
   Upload,
   MessagePlugin,
 } from "../../../../vendor/tdesign.min.js";
 import Lodash from "../../../../vendor/lodash.mjs.js";
+import storage from "../../utils/store.js";
 import { save as saveIt, saveLines, saveText, saveBlob } from "../../utils/save.js";
+
+import FileReaderDemoComments from "./file-reader-demo--comments.js";
 
 function getCurrentDate(needTime = false) {
   const d = new Date();
@@ -27,6 +32,15 @@ function getCurrentDate(needTime = false) {
   if (needTime) return [date, time].join(' ')
   return date;
 };
+
+
+
+const getTagContent = tag => {
+  if (Lodash.isString(tag)) {return tag};
+  return tag?.label ?? tag?.value ?? tag?.face ?? tag?.content ?? tag?.text ?? tag;
+};
+
+
 
 export default function FileReaderDemo() {
   const [files, set_files] = useState([]);
@@ -164,22 +178,12 @@ export default function FileReaderDemo() {
     return false;
   };
   const go_previous_item = () => {
-    // const min_idx = 0;
     const main_idx = data_idx_control__main_idx??0;
     go_nth_item(main_idx-1);
-    // if (main_idx > min_idx) {
-    //   set__data_idx_control__main_idx(main_idx-1);
-    //   set__data_idx_control__nlp_idx(0);
-    // } else {MessagePlugin.info("没有啦");};
   };
   const go_next_item = () => {
-    // const max_idx = (data_list?.length??0)-1;
     const main_idx = data_idx_control__main_idx??0;
     go_nth_item(main_idx+1);
-    // if (main_idx < max_idx) {
-    //   set__data_idx_control__main_idx(main_idx+1);
-    //   set__data_idx_control__nlp_idx(0);
-    // } else {MessagePlugin.info("没有啦");};
   };
   const go_previous_nlp_idx = () => {
     const min_idx = 0;
@@ -196,25 +200,31 @@ export default function FileReaderDemo() {
     } else {MessagePlugin.info("没有啦");};
   };
 
+
+  const proTags = (json_content) => {
+    const tagWraps = [];
+    for (const item of json_content) {
+      if (item.tags?.length) {tagWraps.push(item.tags);};
+      (item?.nlp_outputs??[]).forEach(it=>{if (it.tags?.length) {tagWraps.push(it.tags);};});
+    };
+    set_theTags(Lodash.uniq(tagWraps.flat().map(tag=>getTagContent(tag))));
+  };
   const onSuccess = (context) => {
-    // console.log('context keys\n', Object.keys(context));
-    // console.log('context\n', context);
-    // console.log('context?.file\n', context?.file);
     const textContent = context?.response?.textContent;
     if (!textContent?.length) {
       MessagePlugin.error('加载失败: 没有文本内容');
       return;
     };
     let jsonContent;
-
     const pro = (json_content) => {
       set_content(json_content);
       const new_file_info = {
         name: context?.file?.name,
         fidx: json_content?.[0]?.fidx,
       };
-      // console.log("new_file_info", new_file_info);
       set__current_file_info(new_file_info);
+
+      proTags(json_content);
     };
 
     try {
@@ -238,24 +248,65 @@ export default function FileReaderDemo() {
     };
   };
 
+  const [userName, set_userName] = useState("");
+
+  useEffect(async()=>{
+    const init_userName = await storage?.getItem?.("userName") ?? "";
+    set_userName(init_userName);
+  }, []);
+
+  const [cached_content, set_cached_content] = useState(null);
+
+  useEffect(async()=>{
+    const init_cached_content = await storage?.getItem?.("cached_content") ?? null;
+    set_cached_content(init_cached_content);
+  }, []);
+
   return vNode('div', null, [
     vNode('div', {className: "my-4"}, [
+      vNode('h4', {className: "mb-3"}, "用户"),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        vNode('span', {className: "fw-bold text-muted"}, "用户名"),
+        vNode(Tooltip, {
+          content: "用于备注或留言的标识",
+        }, vNode(Input, {
+          theme: "normal", size: "small", align: "center",
+          style: { width: 240, },
+          placeholder: null,
+          defaultValue: userName,
+          value: userName,
+          onChange: async(nv)=>{
+            set_userName(nv);
+            await storage.setItem("userName", nv);
+          },
+        })),
+      ]),
+    ]),
+
+
+
+    vNode('div', {className: "my-4"}, [
       vNode('h4', {className: "mb-3"}, "文件"),
-      vNode(Upload, {
-        // className: "mx-auto",
-        theme: 'file',  // file | file-flow
-        autoUpload: true,
-        multiple: false,
-        data: { extraData: 123, fileName: 'certificate' },
-        draggable: true,
-        action: null,
-        requestMethod: requestMethod,
-        files: files,
-        formatResponse: formatResponse,
-        onChange: set_files,
-        onFail: onFail,
-        onSuccess: onSuccess,
-      }),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        false ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "选择文件"),
+          vNode(Upload, {
+            // className: "mx-auto",
+            theme: 'file',  // file | file-flow
+            autoUpload: true,
+            multiple: false,
+            data: { extraData: 123, fileName: 'certificate' },
+            draggable: true,
+            action: null,
+            requestMethod: requestMethod,
+            files: files,
+            formatResponse: formatResponse,
+            onChange: set_files,
+            onFail: onFail,
+            onSuccess: onSuccess,
+          }),
+        ],
+      ]),
       vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
         current_file_info?.name==null ? null : [
           vNode('span', {className: "fw-bold text-muted"}, "文件名"),
@@ -284,7 +335,54 @@ export default function FileReaderDemo() {
           total_char_num,
         ],
       ]),
+      vNode('div', {className: "my-1 hstack gap-1"}, [
+        cached_content==null ? null :
+        vNode(Tooltip, {
+          content: "从浏览器缓存中读取内容",
+        }, vNode(Button, {
+          theme: "default", size: "small", onClick: ()=>{
+            set__current_file_info(cached_content?.current_file_info);
+            set_data_list(cached_content?.data_list);
+            proTags(cached_content?.data_list);
+            MessagePlugin.success("已读取");
+          },
+        }, "从缓存读取")),
+        cached_content==null ? null :
+        vNode(Tooltip, {
+          content: "将浏览器缓存中的内容清除",
+        }, vNode(Button, {
+          theme: "default", size: "small", onClick: async()=>{
+            await storage.removeItem("cached_content").then(()=>{
+              set_cached_content(null);
+              MessagePlugin.warning("已清除");
+            });
+          },
+        }, "清除缓存")),
+        (!data_list?.length) ? null :
+        vNode(Tooltip, {
+          content: "将当前文件内容保存到浏览器缓存中，请注意：会取代缓存中已有的内容",
+        }, vNode(Button, {
+          theme: "default", size: "small", onClick: async()=>{
+            const new_cached_content = {current_file_info: current_file_info, data_list: data_list};
+            await storage.setItem("cached_content", new_cached_content).then(()=>{
+              set_cached_content(new_cached_content);
+              MessagePlugin.success("已保存");
+            });
+          },
+        }, "保存到缓存")),
+        (!data_list?.length) ? null :
+        vNode(Tooltip, {
+          content: "尤其在修改过标签或备注之后，请记得导出",
+        }, vNode(Button, {
+          theme: "default", size: "small", onClick: ()=>{
+            saveLines(data_list, current_file_info?.name);
+            MessagePlugin.success("已导出");
+          },
+        }, "导出到新文件")),
+      ]),
     ]),
+
+
 
     (!data_list?.length) ? null :
     vNode('div', {className: "my-4"}, [
@@ -358,6 +456,25 @@ export default function FileReaderDemo() {
         ],
       ]),
       vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        false ? null : [
+          vNode('span', {className: "fw-bold text-muted"}, "评论或备注"),
+        ],
+      ]),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+        false ? null : [
+          vNode(FileReaderDemoComments, {
+            userName: userName,
+            comments: (data_item?.comments??[]),
+            onChange: (newComments)=>{
+              // console.log(newComments);
+              const the_data_list = data_list;
+              the_data_list[data_idx_control__main_idx].comments = [...newComments];
+              set_data_list([...the_data_list]);
+            },
+          }),
+        ],
+      ]),
+      vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
         vNode('span', {className: "fw-bold text-muted"}, "各文本片段"),
       ]),
       vNode('div', {className: "my-1 hstack gap-1 flex-wrap"}, (data_item?.nlp_outputs??[]).map((nlp_item, idx)=>vNode('button', {
@@ -373,6 +490,8 @@ export default function FileReaderDemo() {
         // nlp_item?.text??"<无内容>",
       ]))),
     ]),
+
+
 
     nlp_data==null ? null :
     vNode('div', {className: "my-4"}, [
