@@ -1,4 +1,4 @@
-import { createElement as vNode, Fragment, useState } from "../../../../vendor/react.js";
+import { createElement as vNode, Fragment, useState, useEffect } from "../../../../vendor/react.js";
 import storage from "../../utils/store.js";
 // import ReactRouterDom from "../../../../vendor/react-router-dom.js";
 import MyViewPanelGroup from "../../components/MyViewPanelGroup.js";
@@ -46,12 +46,18 @@ const backendNLP = async (text, href, timeoutDuration=30000) => {
 
 export default function RealTimeDemo() {
 
-  const [backend_href, set_backend_href] = useState(storage?.getItem?.("backend_href")??"");
+  const [backend_href, set_backend_href] = useState("");
   const [is_checking, set_is_checking] = useState(false);
-  const [real_time_demo_text, set_real_time_demo_text] = useState(storage?.getItem?.("real_time_demo_text")??"");
+  const [real_time_demo_text, set_real_time_demo_text] = useState("");
   const [is_processing, set_is_processing] = useState(false);
-
   const [nlp_data, set_nlp_data] = useState(null);
+
+  useEffect(async()=>{
+    const init_backend_href = await storage?.getItem?.("backend_href") ?? "";
+    set_backend_href(init_backend_href);
+    const init_real_time_demo_text = await storage?.getItem?.("real_time_demo_text") ?? "";
+    set_real_time_demo_text(init_real_time_demo_text);
+  }, []);
 
   return vNode('div', {
     className: ["container"].join(" "),
@@ -78,10 +84,10 @@ export default function RealTimeDemo() {
             type: "text",
             'aria-label': "后端地址",
             value: backend_href,
-            onChange: (event)=>{
+            onChange: async(event)=>{
               const new_backend_href = event?.target?.value ?? "";
               set_backend_href(new_backend_href);
-              storage.setItem("backend_href", new_backend_href);
+              await storage.setItem("backend_href", new_backend_href);
             },
           }),
           vNode('button', {
@@ -143,10 +149,10 @@ export default function RealTimeDemo() {
             'aria-label': "待分析文本",
             rows: 3,
             value: real_time_demo_text,
-            onChange: (event)=>{
+            onChange: async (event)=>{
               const new_real_time_demo_text = event?.target?.value ?? "";
               set_real_time_demo_text(new_real_time_demo_text);
-              storage.setItem("real_time_demo_text", new_real_time_demo_text);
+              await storage.setItem("real_time_demo_text", new_real_time_demo_text);
             },
           }),
           vNode('button', {

@@ -1,84 +1,95 @@
+import LocalForage from "../../../vendor/localforage.mjs.js";
+
 const appName = 'NLP-Viewer'
-const defaultType = 'local'  // 'local' || 'session'
+// const defaultType = 'local'  // 'local' || 'session'
 
-function _serialize(obj) {
-  return JSON.stringify(obj)
-}
+LocalForage.config({
+  name: appName,
+});
 
-function _deserialize(str, defaultVal = null) {
-  if (!str) return defaultVal
-  let val = null
-  try {
-    val = JSON.parse(str)
-  } catch (e) {
-    val = str
-  }
-  return val || defaultVal
-}
+// function _serialize(obj) {
+//   return JSON.stringify(obj)
+// }
 
-function getLocal(key) {
-  return _deserialize(localStorage.getItem(`${appName}:${key}`))
-}
+// function _deserialize(str, defaultVal = null) {
+//   if (!str) return defaultVal
+//   let val = null
+//   try {
+//     val = JSON.parse(str)
+//   } catch (e) {
+//     val = str
+//   }
+//   return val || defaultVal
+// }
 
-function getSession(key) {
-  return _deserialize(sessionStorage.getItem(`${appName}:${key}`))
-}
+// function getLocal(key) {
+//   return _deserialize(localStorage.getItem(`${appName}:${key}`))
+// }
 
-function getItem(key, type) {
-  if (type === 'local') {
-    getLocal(key)
-  } else if (type === 'session') {
-    getSession(key)
-  } else {
-    return getLocal(key) || getSession(key)
-  }
-}
+// function getSession(key) {
+//   return _deserialize(sessionStorage.getItem(`${appName}:${key}`))
+// }
 
-function setLocal(key, value) {
-  if (value != undefined) {
-    localStorage.setItem(`${appName}:${key}`, _serialize(value))
-    // console.log(`存储成功！值为${getLocal(key)}`)
-  }
-}
+// function getItem(key, type) {
+//   if (type === 'local') {
+//     getLocal(key)
+//   } else if (type === 'session') {
+//     getSession(key)
+//   } else {
+//     return getLocal(key) || getSession(key)
+//   }
+// }
 
-function setSession(key, value) {
-  if (value != undefined) {
-    sessionStorage.setItem(`${appName}:${key}`, _serialize(value))
-  }
-}
+// function setLocal(key, value) {
+//   if (value != undefined) {
+//     localStorage.setItem(`${appName}:${key}`, _serialize(value))
+//     // console.log(`存储成功！值为${getLocal(key)}`)
+//   }
+// }
 
-function setItem(key, value, type=defaultType) {
-  if (type === 'local') {
-    setLocal(key, value)
-  } else if (type === 'session') {
-    setSession(key, value)
-  } else {
-    console.log('type 必须为 local或session')
-  }
-}
+// function setSession(key, value) {
+//   if (value != undefined) {
+//     sessionStorage.setItem(`${appName}:${key}`, _serialize(value))
+//   }
+// }
 
-function removeLocal(key) {
-  return localStorage.removeItem(`${appName}:${key}`)
-}
+// function setItem(key, value, type=defaultType) {
+//   if (type === 'local') {
+//     setLocal(key, value)
+//   } else if (type === 'session') {
+//     setSession(key, value)
+//   } else {
+//     console.log('type 必须为 local或session')
+//   }
+// }
 
-function removeSession(key) {
-  return sessionStorage.removeItem(`${appName}:${key}`)
-}
+// function removeLocal(key) {
+//   return localStorage.removeItem(`${appName}:${key}`)
+// }
 
-function removeItem(key, value, type=defaultType) {
-  if (type === 'local') {
-    removeLocal(key, value)
-  } else if (type === 'session') {
-    removeSession(key, value)
-  } else {
-    console.log('type 必须为 local或session')
-  }
-}
+// function removeSession(key) {
+//   return sessionStorage.removeItem(`${appName}:${key}`)
+// }
+
+// function removeItem(key, value, type=defaultType) {
+//   if (type === 'local') {
+//     removeLocal(key, value)
+//   } else if (type === 'session') {
+//     removeSession(key, value)
+//   } else {
+//     console.log('type 必须为 local或session')
+//   }
+// }
 
 
 export default {
-  setItem,
-  getItem,
-  removeItem,
+  setItem: LocalForage.setItem,
+  getItem: LocalForage.getItem,
+  removeItem: LocalForage.removeItem,
+  clear: LocalForage.clear,
+  length: LocalForage.length,
+  key: LocalForage.key,
+  keys: LocalForage.keys,
+  iterate: LocalForage.iterate,
 }
 

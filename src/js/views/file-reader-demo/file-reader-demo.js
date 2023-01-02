@@ -285,8 +285,8 @@ export default function FileReaderDemo() {
         ],
       ]),
       vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
-        vNode('span', {className: "fw-bold text-muted"}, "序号"),
-        (1+(+data_idx_control__main_idx)),
+        // vNode('span', {className: "fw-bold text-muted"}, "序号"),
+        // (1+(+data_idx_control__main_idx)),
       // ]),
       // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
         data_item?.sidx==null ? null : [
@@ -360,8 +360,8 @@ export default function FileReaderDemo() {
         ],
       ]),
       vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
-        vNode('span', {className: "fw-bold text-muted"}, "序号"),
-        (1+(+data_idx_control__nlp_idx)),
+        // vNode('span', {className: "fw-bold text-muted"}, "序号"),
+        // (1+(+data_idx_control__nlp_idx)),
       // ]),
       // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
         nlp_data?.frag_idx==null ? null : [
