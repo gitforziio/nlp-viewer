@@ -19,6 +19,9 @@ import {
   MessagePlugin,
   DialogPlugin,
 } from "../../../../vendor/tdesign.min.js";
+
+import TagEditor from "./TagEditor.js";
+
 import Lodash from "../../../../vendor/lodash.mjs.js";
 import storage from "../../utils/store.js";
 import { save as saveIt, saveLines, saveText, saveBlob } from "../../utils/save.js";
@@ -129,6 +132,9 @@ export default function FileReaderDemo() {
       set_collectedMaterials([...collectedMaterials]);
       await storage.setItem("collectedMaterials", collectedMaterials);
     };
+  };
+  const addToCollectedFrags = async(item) => {
+    const the_item = Object.assign({}, item);
   };
 
 
@@ -311,6 +317,7 @@ export default function FileReaderDemo() {
   const toPrueMaterial = (data_list)=>{
     return data_list.map(it=>({
       head: it?.head,
+      source_file_name: it?.source_file_name,
       fidx: it?.fidx,
       sidx: it?.sidx,
       nlp_outputs: (it?.nlp_outputs??[]).map(li=>({
@@ -326,6 +333,7 @@ export default function FileReaderDemo() {
     if (lines.length) {lines.push("");};
     for (const it of data_list) {
       lines.push("");
+      if (it?.source_file_name!=null) {lines.push(`source_file_name: ${it.source_file_name}`);};
       if (it?.fidx!=null) {lines.push(`fidx: ${it.fidx}`);};
       if (it?.sidx!=null) {lines.push(`sidx: ${it.sidx}`);};
       if (it?.head?.length) {lines.push(`head: ${it.head}`);};
@@ -539,12 +547,12 @@ export default function FileReaderDemo() {
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       false ? null : [
         vNode('span', {className: "fw-bold text-muted"}, "标签"),
-        vNode(Select, {
-          placeholder: "选择或输入并回车",
-          multiple: true,
-          filterable: true,
-          creatable: true,
-          clearable: true,
+      ],
+    ]),
+
+    vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+      false ? null : [
+        vNode(TagEditor, {
           options: theMaterialTags.map(tag=>({label: tag, value: tag})),
           value: (data_item?.tags??[]),
           defaultValue: (data_item?.tags??[]),
@@ -557,17 +565,6 @@ export default function FileReaderDemo() {
           onCreate: (new_tags)=>{
             const new_theMaterialTags= Lodash.uniq([...theMaterialTags, ...new_tags]);
             set_theMaterialTags([...new_theMaterialTags]);
-          },
-        }),
-        vNode(Checkbox.Group, {
-          options: theMaterialTags.map(tag=>({label: tag, value: tag})),
-          value: (data_item?.tags??[]),
-          defaultValue: (data_item?.tags??[]),
-          onChange: (new_tag_list)=>{
-            // console.log(new_tag_list);
-            const the_data_list = data_list;
-            the_data_list[data_idx_control__main_idx].tags = [...new_tag_list];
-            set__data_list([...the_data_list]);
           },
         }),
       ],
@@ -596,7 +593,7 @@ export default function FileReaderDemo() {
         vNode('span', {className: "fw-bold text-muted"}, "操作"),
         vNode(Button, { theme: "default", size: "small", onClick: async()=>{
           await addToCollectedMaterials(data_item);
-        }, }, "添加到收集箱")
+        }, }, "添加到收集箱"),
       ],
     ]),
 
@@ -688,16 +685,24 @@ export default function FileReaderDemo() {
         }),
       ],
     ]),
+    vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+      false ? null : [
+        vNode('span', {className: "fw-bold text-muted"}, "操作"),
+        vNode(Button, { theme: "default", size: "small", onClick: async()=>{
+          await addToCollectedFrags(data_item);
+        }, }, "添加到收集箱"),
+      ],
+    ]),
 
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       false ? null : [
         vNode('span', {className: "fw-bold text-muted"}, "标签"),
-        vNode(Select, {
-          placeholder: "选择或输入并回车",
-          multiple: true,
-          filterable: true,
-          creatable: true,
-          clearable: true,
+      ],
+    ]),
+
+    vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+      false ? null : [
+        vNode(TagEditor, {
           options: theFragTags.map(tag=>({label: tag, value: tag})),
           value: (nlp_data?.tags??[]),
           defaultValue: (nlp_data?.tags??[]),
@@ -710,17 +715,6 @@ export default function FileReaderDemo() {
           onCreate: (new_tags)=>{
             const new_theFragTags= Lodash.uniq([...theFragTags, ...new_tags]);
             set_theFragTags([...new_theFragTags]);
-          },
-        }),
-        vNode(Checkbox.Group, {
-          options: theFragTags.map(tag=>({label: tag, value: tag})),
-          value: (nlp_data?.tags??[]),
-          defaultValue: (nlp_data?.tags??[]),
-          onChange: (new_tag_list)=>{
-            // console.log(new_tag_list);
-            const the_data_list = data_list;
-            the_data_list[data_idx_control__main_idx].nlp_outputs[data_idx_control__nlp_idx].tags = [...new_tag_list];
-            set__data_list([...the_data_list]);
           },
         }),
       ],
