@@ -547,11 +547,11 @@ export default function FileReaderDemo() {
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       false ? null : [
         vNode('span', {className: "fw-bold text-muted"}, "标签"),
-      ],
-    ]),
+    //   ],
+    // ]),
 
-    vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
-      false ? null : [
+    // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+    //   false ? null : [
         vNode(TagEditor, {
           options: theMaterialTags.map(tag=>({label: tag, value: tag})),
           value: (data_item?.tags??[]),
@@ -641,6 +641,7 @@ export default function FileReaderDemo() {
       set__data_idx_control__nlp_idx(nlp_idx+1);
     } else {MessagePlugin.info("没有啦");};
   };
+  const [showVis, set_showVis] = useState(false);
 
   const FragBlock = ()=>vNode('div', {className: "my-5"}, [
     vNode('h4', {className: "mb-3"}, "当前片段"),
@@ -697,11 +698,11 @@ export default function FileReaderDemo() {
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       false ? null : [
         vNode('span', {className: "fw-bold text-muted"}, "标签"),
-      ],
-    ]),
+    //   ],
+    // ]),
 
-    vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
-      false ? null : [
+    // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+    //   false ? null : [
         vNode(TagEditor, {
           options: theFragTags.map(tag=>({label: tag, value: tag})),
           value: (nlp_data?.tags??[]),
@@ -722,8 +723,14 @@ export default function FileReaderDemo() {
 
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       vNode('span', {className: "fw-bold text-muted"}, "结构可视化"),
+      vNode(Switch, {
+        value: showVis,
+        onChange: (newValue)=>{
+          set_showVis(newValue);
+        },
+      }),
     ]),
-    vNode(MyViewPanelGroup, {
+    !showVis ? null : vNode(MyViewPanelGroup, {
       data: nlp_data,
       key: `[${data_idx_control__main_idx}][${data_idx_control__nlp_idx}]${nlp_data?.text}`,
     }),
