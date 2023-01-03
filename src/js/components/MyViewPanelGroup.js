@@ -129,6 +129,7 @@ export default function MyViewPanelGroup(props) {
       key: it.key,
     }, vNode(MyViewPanel, {
       data: it.data,
+      sourceData: it.sourceData,
       elementId: it.elementId,
     })))))),
   ]);

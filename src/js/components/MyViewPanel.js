@@ -105,6 +105,35 @@ export default function MyViewPanel(props) {
 
   const theSVG = useRef(null);
 
+  const showJson = async(flag="data", indent=undefined)=>{
+    const myDialog = DialogPlugin({
+      width: "80%",
+      header: "查看JSON",
+      body: vNode('div', {
+        className: "",
+      }, [
+        vNode('div', {}, [
+          vNode('textarea', {
+            className: [
+              "form-control",
+              // "form-control-sm",
+            ].join(" "),
+            // value: JSON.stringify(props?.data, null, 2),
+            // value: JSON.stringify(props?.['sourceData']),
+            value: JSON.stringify(props?.[flag], null, indent),
+          }),
+        ]),
+      ]),
+      cancelBtn: false,
+      onConfirm: ({ event, trigger }) => {
+        myDialog.hide();
+      },
+      onClose: ({ event, trigger }) => {
+        myDialog.hide();
+      },
+    });
+  };
+
 
 
   return vNode('div', {
@@ -197,7 +226,7 @@ export default function MyViewPanel(props) {
         },
       }, "调整布局")),
       vNode(Tooltip, {
-        content: "查看json格式的数据内容",
+        content: "查看针对可视化工具处理之后的json格式数据",
       }, vNode('button', {
         type: "button",
         className: [
@@ -205,33 +234,21 @@ export default function MyViewPanel(props) {
           "btn-outline-secondary",
         ].join(" "),
         onClick: async()=>{
-          const myDialog = DialogPlugin({
-            width: "80%",
-            header: "查看JSON",
-            body: vNode('div', {
-              className: "",
-            }, [
-              vNode('div', {}, [
-                vNode('textarea', {
-                  className: [
-                    "form-control",
-                    // "form-control-sm",
-                  ].join(" "),
-                  // value: JSON.stringify(props?.data, null, 2),
-                  value: JSON.stringify(props?.data),
-                }),
-              ]),
-            ]),
-            cancelBtn: false,
-            onConfirm: ({ event, trigger }) => {
-              myDialog.hide();
-            },
-            onClose: ({ event, trigger }) => {
-              myDialog.hide();
-            },
-          });
+          showJson('data');
         },
       }, "查看JSON")),
+      vNode(Tooltip, {
+        content: "查看原始的json格式数据内容",
+      }, vNode('button', {
+        type: "button",
+        className: [
+          "btn btn-sm",
+          "btn-outline-secondary",
+        ].join(" "),
+        onClick: async()=>{
+          showJson('sourceData');
+        },
+      }, "查看原始JSON")),
       vNode(Tooltip, {
         content: "将此图形以SVG格式导出保存",
       }, vNode('button', {
@@ -249,7 +266,7 @@ export default function MyViewPanel(props) {
           saveText(theVis?.svg?.node?.()?.outerHTML, `${elementId}.svg`);
         },
       }, "导出SVG")),
-      vNode(Tooltip, {
+      true ? null : vNode(Tooltip, {
         content: "将此图形以PNG格式导出保存",
       }, vNode('button', {
         type: "button",

@@ -1,21 +1,7 @@
 import { createElement as vNode, Fragment, useState, useMemo, useEffect } from "../../../../vendor/react.js";
-// import ReactRouterDom from "../../../../vendor/react-router-dom.js";
-import MyViewPanelGroup from "../../components/MyViewPanelGroup.js";
 import {
-  Layout,
-  Menu,
-  Row,
-  Col,
-  Space,
-  Tooltip,
   Textarea,
   Button,
-  Select,
-  Checkbox,
-  Input,
-  TagInput,
-  InputNumber,
-  Upload,
   MessagePlugin,
   DialogPlugin,
 } from "../../../../vendor/tdesign.min.js";
@@ -49,7 +35,6 @@ export default function FileReaderDemoComments(props) {
             header: "删除留言",
             body: (comment?.user?.userName ?? "")!=(props?.userName ?? "") ? "请注意：这不是你的留言。确定要删除吗？" : "确定要删除吗？",
             onConfirm: ({ event, trigger }) => {
-              console.log({ event, trigger, idx, comment, comments: props?.comments });
               const the_comments = [...(props?.comments??[])];
               the_comments.splice(idx, 1);
               props?.onChange?.(the_comments);

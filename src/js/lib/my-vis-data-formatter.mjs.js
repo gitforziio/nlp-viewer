@@ -249,6 +249,7 @@ export function formatter_All(view_data) {
         items: data[byWho][tag].map((detail_item, detail_idx)=>({
           key: `diagram-${byWho}-${tag.split("/").join("-")}-${detail_idx}`,
           data: formatter_fn(detail_item, detail_idx, data),
+          sourceData: detail_item,
           elementId: `diagram-${byWho}-${tag.split("/").join("-")}-${detail_idx}`,
         })),
         ref_info: ref_info ?? null,
