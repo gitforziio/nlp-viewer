@@ -113,6 +113,7 @@ export default function FileReaderDemo() {
             collectedMaterials[foundIdx]=the_item;
             set_collectedMaterials([...collectedMaterials]);
             await storage.setItem("collectedMaterials", collectedMaterials);
+            MessagePlugin.success("已覆盖");
             myDialog.hide();
           }}, "对已有内容进行覆盖")),
         ]),
@@ -121,6 +122,7 @@ export default function FileReaderDemo() {
           collectedMaterials.push(the_item);
           set_collectedMaterials([...collectedMaterials]);
           await storage.setItem("collectedMaterials", collectedMaterials);
+          MessagePlugin.success("已添加");
           myDialog.hide();
         },
         onClose: ({ event, trigger }) => {
