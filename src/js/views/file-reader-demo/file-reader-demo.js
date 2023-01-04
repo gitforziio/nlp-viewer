@@ -133,6 +133,7 @@ export default function FileReaderDemo() {
       collectedMaterials.push(the_item);
       set_collectedMaterials([...collectedMaterials]);
       await storage.setItem("collectedMaterials", collectedMaterials);
+      MessagePlugin.success("已添加");
     };
   };
   const addToCollectedFrags = async(item) => {
