@@ -25,7 +25,13 @@ import { save as saveIt, saveLines, saveText, saveBlob } from "../../utils/save.
 
 export default function FileReaderDemoSettings(props) {
 
-  const basicMaterialTags = [];
+  const basicMaterialTags = [
+    '单人',
+    '双人',
+    '多人',
+    '无器械',
+    '有器械',
+  ];
   const basicFragTags = [
     '配列-LZ:[+部位]&V',
     '配列-LZ:[+部位1]&“和”&[+部位2]&V',
@@ -54,6 +60,8 @@ export default function FileReaderDemoSettings(props) {
     '特点:[+方式/方法]',
     '特点:[+连词]',
     '特点:[+随动]',
+    '特点:[+单音节动作]',
+    '特点:[+单音节部位]',
   ];
 
   const [primaryMaterialTags, set_primaryMaterialTags] = useState(basicMaterialTags);
