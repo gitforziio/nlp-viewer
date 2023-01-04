@@ -2,6 +2,7 @@ import { createElement as vNode, Fragment, useState, useEffect } from "../../../
 import storage from "../../utils/store.js";
 // import ReactRouterDom from "../../../../vendor/react-router-dom.js";
 import MyViewPanelGroup from "../../components/MyViewPanelGroup.js";
+import MySegAndPosPanel from "../../components/MySegAndPosPanel.js";
 import {
   Layout,
   Menu,
@@ -187,6 +188,22 @@ export default function RealTimeDemo() {
           ]) : "分析"),
         ])
       ]),
+    ]),
+
+
+
+    nlp_data==null ? null :
+    vNode('div', {
+      className: ["row", "my-3", "d-flex", "align-items-center"].join(" "),
+    }, [
+      vNode('div', {
+        className: ["col"].join(" "),
+      }, [
+        vNode(MySegAndPosPanel, {
+          data: nlp_data,
+          key: nlp_data?.text,
+        }),
+      ])
     ]),
 
 

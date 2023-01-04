@@ -208,6 +208,66 @@ export function formatter_Dep_FastHan(item, idx, wrap) {
 };
 
 
+
+// export function normalize_Seg_LTP(wrap) {
+//   const nlp = wrap.by_ltp;
+//   return nlp?.cws ?? [];
+// };
+// export function normalize_Seg_HanLP(wrap) {
+//   const nlp = wrap.by_hanlp;
+//   return nlp?.tok ?? [];
+// };
+export function normalize_Seg_FastHan(wrap) {
+  const nlp = wrap.by_fasthan;
+  return (nlp?.cws ?? []).map(list=>list.map(it=>[it]));
+};
+
+export function normalize_POS_FastHan(wrap) {
+  const nlp = wrap.by_fasthan;
+  return nlp?.pos ?? [];
+};
+export function normalize_POS_JieBa(wrap) {
+  return wrap?.by_jieba==null ? [] : [wrap.by_jieba];
+};
+export function normalize_POS_PKUSeg(wrap) {
+  return wrap?.by_pkuseg==null ? [] : [wrap.by_pkuseg];
+};
+
+export function normalize_POS_Stanza(wrap, standard="u") {
+  // u  x
+  const nlp = wrap.by_stanza;
+  if (nlp?.tokens?.[0]?.[0]?.[`${standard}pos`]==null) {return []};
+  return nlp.tokens.map(token_list=>token_list.map(token=>[token.text, token[`${standard}pos`]]));
+};
+export function normalize_POS_HanLP(wrap, standard="CTB") {
+  // CTB  PKU  863
+  const nlp = wrap.by_hanlp;
+  if (nlp?.[`pos/${standard}`]==null) {return []};
+  const token_lists = nlp?.tok ?? [];
+  const result = [];
+  for (const list_idx in token_lists) {
+    const token_list = token_lists[list_idx];
+    const pos_list = nlp[`pos/${standard}`]?.[list_idx]??[];
+    const posed_list = Lodash.zip(token_list, pos_list);
+    result.push(posed_list);
+  };
+  return result;
+};
+export function normalize_POS_LTP(wrap) {
+  const nlp = wrap.by_ltp;
+  if (nlp?.[`pos`]==null) {return []};
+  const word_lists = nlp?.cws ?? [];
+  const result = [];
+  for (const list_idx in word_lists) {
+    const word_list = word_lists[list_idx];
+    const pos_list = nlp[`pos`]?.[list_idx]??[];
+    const posed_list = Lodash.zip(word_list, pos_list);
+    result.push(posed_list);
+  };
+  return result;
+};
+
+
 const ref_info_dict = {
   'amr': {
     link: "https://github.com/amrisi/amr-guidelines/blob/master/amr.md",
@@ -236,6 +296,63 @@ const ref_info_dict = {
   'ltp-sdp': {
     link: "http://ltp.ai/docs/appendix.html#id6",
   },
+  'fasthan-cws': {
+    link: "https://github.com/fastnlp/fastHan/blob/master/README.md?plain=1#L139",
+  },
+  'fasthan-pos': {
+    link: "https://github.com/fastnlp/fastHan/blob/master/README.md?plain=1#L167",
+  },
+  'jieba-pos': {
+    link: "",
+  },
+  'pkuseg-pos': {
+    link: "",
+  },
+  'ltp-pos': {
+    link: "http://ltp.ai/docs/appendix.html#id2",
+  },
+  'hanlp-pos-ctb': {
+    link: "https://hanlp.hankcs.com/docs/annotations/pos/ctb.html",
+  },
+  'hanlp-pos-pku': {
+    link: "https://hanlp.hankcs.com/docs/annotations/pos/pku.html",
+  },
+  'hanlp-pos-863': {
+    link: "https://hanlp.hankcs.com/docs/annotations/pos/863.html",
+  },
+  'stanza-pos-u': {
+    link: "https://universaldependencies.org/u/pos/",
+  },
+  'stanza-pos-x': {
+    link: "https://stanfordnlp.github.io/stanza/pos.html#description",
+  },
+};
+
+
+export function normalize_All(view_data) {
+  const list_ = [];
+  const step = (data, byWho, tag, list, header, normalize_fn, ref_info) => {
+    if (data?.[byWho]?.[tag] != null) {
+      list.push({
+        header: header,
+        items: normalize_fn(data),
+        ref_info: ref_info ?? null,
+      });
+    };
+  };
+
+  step(view_data, 'by_fasthan', 'cws', list_, 'FastHan(CWS)', normalize_Seg_FastHan, ref_info_dict['fasthan-cws']);
+  step(view_data, 'by_fasthan', 'pos', list_, 'FastHan', normalize_POS_FastHan, ref_info_dict['fasthan-pos']);
+  step(view_data, 'by_jieba', 0, list_, 'JieBa', normalize_POS_JieBa, ref_info_dict['jieba-pos']);
+  step(view_data, 'by_pkuseg', 0, list_, 'PKU-Seg', normalize_POS_PKUSeg, ref_info_dict['pkuseg-pos']);
+  step(view_data, 'by_ltp', 'cws', list_, 'LTP', normalize_POS_LTP, ref_info_dict['ltp-pos']);
+  step(view_data, 'by_stanza', 'tokens', list_, 'Stanza(UD)', wrap=>normalize_POS_Stanza(wrap, "u"), ref_info_dict['stanza-pos-u']);
+  step(view_data, 'by_stanza', 'tokens', list_, 'Stanza(CTB[XPOS])', wrap=>normalize_POS_Stanza(wrap, "x"), ref_info_dict['stanza-pos-x']);
+  step(view_data, 'by_hanlp', 'pos/CTB', list_, 'HanLP(CTB)', wrap=>normalize_POS_HanLP(wrap, "CTB"), ref_info_dict['hanlp-pos-ctb']);
+  step(view_data, 'by_hanlp', 'pos/PKU', list_, 'HanLP(PKU)', wrap=>normalize_POS_HanLP(wrap, "PKU"), ref_info_dict['hanlp-pos-pku']);
+  step(view_data, 'by_hanlp', 'pos/863', list_, 'HanLP(863)', wrap=>normalize_POS_HanLP(wrap, "863"), ref_info_dict['hanlp-pos-863']);
+
+  return list_;
 };
 
 

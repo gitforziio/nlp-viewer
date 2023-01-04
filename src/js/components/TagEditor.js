@@ -1,10 +1,10 @@
-import { createElement as vNode, useState } from "../../../../vendor/react.js";
+import { createElement as vNode, useState } from "../../../vendor/react.js";
 import {
   Button,
   Select,
   Checkbox,
-} from "../../../../vendor/tdesign.min.js";
-import Lodash from "../../../../vendor/lodash.mjs.js";
+} from "../../../vendor/tdesign.min.js";
+import Lodash from "../../../vendor/lodash.mjs.js";
 
 const getTagContent = tag => {
   if (Lodash.isString(tag)) {return tag};

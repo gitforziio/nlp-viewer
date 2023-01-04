@@ -1,6 +1,5 @@
 import { createElement as vNode, Fragment, useState, useMemo, useEffect } from "../../../../vendor/react.js";
 // import ReactRouterDom from "../../../../vendor/react-router-dom.js";
-import MyViewPanelGroup from "../../components/MyViewPanelGroup.js";
 import {
   Layout,
   Menu,
@@ -19,8 +18,9 @@ import {
   MessagePlugin,
   DialogPlugin,
 } from "../../../../vendor/tdesign.min.js";
-
-import TagEditor from "./TagEditor.js";
+import TagEditor from "../../components/TagEditor.js";
+import MyViewPanelGroup from "../../components/MyViewPanelGroup.js";
+import MySegAndPosPanel from "../../components/MySegAndPosPanel.js";
 
 import Lodash from "../../../../vendor/lodash.mjs.js";
 import storage from "../../utils/store.js";
@@ -726,6 +726,14 @@ export default function FileReaderDemo() {
         }),
       ],
     ]),
+
+    vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+      vNode('span', {className: "fw-bold text-muted"}, "分词和词性标注"),
+    ]),
+    vNode(MySegAndPosPanel, {
+      data: nlp_data,
+      key: `[${data_idx_control__main_idx}][${data_idx_control__nlp_idx}]${nlp_data?.text}`,
+    }),
 
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       vNode('span', {className: "fw-bold text-muted"}, "结构可视化"),
