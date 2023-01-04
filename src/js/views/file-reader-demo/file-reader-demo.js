@@ -675,7 +675,7 @@ export default function FileReaderDemo() {
 
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       false ? null : [
-        vNode('span', {className: "fw-bold text-muted"}, "星标"),
+        vNode('span', {className: "fw-bold text-muted"}, "标红突出显示"),
         vNode(Switch, {
           value: nlp_data?.fav ?? false,
           onChange: (newValue)=>{

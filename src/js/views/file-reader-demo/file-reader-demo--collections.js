@@ -84,7 +84,10 @@ export default function FileReaderDemoCollections(props) {
             });
           },
         }, "删除"),
-        mtrl?.nlp_outputs?.map((frag, fr_idx)=>vNode('span', {key: `${fr_idx}`, className: "fw-normal"}, frag?.text??"<无内容>")),
+        mtrl?.nlp_outputs?.map((frag, fr_idx)=>vNode('span', {key: `${fr_idx}`, className: [
+          "fw-normal",
+          frag?.fav ? "text-danger" : "text-",
+        ].join(" ")}, frag?.text??"<无内容>")),
       ])),
     ]),
 
