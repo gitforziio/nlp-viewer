@@ -65,6 +65,7 @@ export default function FileReaderDemoCollections(props) {
         key: `${mt_idx}`,
         className: "my-1 hstack gap-2 flex-wrap",
       }, [
+        vNode('span', {className: "fw-normal text-muted"}, `[${(mt_idx+1)}]`),
         vNode('span', {className: "fw-normal text-muted"}, mtrl?.head??"<无题>"),
         vNode(Button, {
           theme: "default", size: "small",
