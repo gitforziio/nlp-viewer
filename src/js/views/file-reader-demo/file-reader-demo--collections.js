@@ -26,7 +26,7 @@ import { save as saveIt, saveLines, saveText, saveBlob } from "../../utils/save.
 export default function FileReaderDemoCollections(props) {
 
   return vNode('div', {}, [
-    vNode('h5', {className: "h5"}, "已收集的条目"),
+    // vNode('h5', {className: "h5"}, "已收集的条目"),
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       vNode('span', {className: "fw-bold text-muted"}, "操作"),
       vNode(Tooltip, {
@@ -92,9 +92,9 @@ export default function FileReaderDemoCollections(props) {
     ]),
 
 
-    vNode('h5', {className: "h5"}, "已收集的片段"),
-    vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
-      vNode('span', {className: "fw-bold text-muted"}, "收集的片段"),
-    ]),
+    // vNode('h5', {className: "h5"}, "已收集的片段"),
+    // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+    //   vNode('span', {className: "fw-bold text-muted"}, "收集的片段"),
+    // ]),
   ]);
 };

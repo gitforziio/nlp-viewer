@@ -40,27 +40,35 @@ export default function FileReaderDemoComments(props) {
             set_boxContent(value);
           },
         }),
-        vNode('div', {}, vNode(Button, {
-          theme: "default", size: "small",
-          onClick: ()=>{
-            if (!props?.userName?.length) {
-              MessagePlugin.warning("请先设置用户名！");
-              return;
-            };
-            if (!boxContent?.length) {
-              MessagePlugin.warning("请先填写内容！");
-              return;
-            };
-            const the_comments = [...(props?.comments??[])];
-            the_comments.push({
-              user: { userName: props?.userName, },
-              content: boxContent,
-              time: (new Date()).toISOString(),
-            });
-            props?.onChange?.(the_comments);
-            set_editing(false);
-          },
-        }, "确定")),
+        vNode('div', {className: "my-1 hstack gap-2"}, [
+          vNode(Button, {
+            theme: "primary", size: "small",
+            onClick: ()=>{
+              if (!props?.userName?.length) {
+                MessagePlugin.warning("请先设置用户名！");
+                return;
+              };
+              if (!boxContent?.length) {
+                MessagePlugin.warning("请先填写内容！");
+                return;
+              };
+              const the_comments = [...(props?.comments??[])];
+              the_comments.push({
+                user: { userName: props?.userName, },
+                content: boxContent,
+                time: (new Date()).toISOString(),
+              });
+              props?.onChange?.(the_comments);
+              set_editing(false);
+            },
+          }, "确定"),
+          vNode(Button, {
+            theme: "default", size: "small",
+            onClick: ()=>{
+              set_editing(false);
+            },
+          }, "取消"),
+        ]),
       ],
     ]),
     (props?.comments??[]).map((comment, idx)=>vNode('div', {

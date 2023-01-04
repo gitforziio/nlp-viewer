@@ -523,22 +523,24 @@ export default function FileReaderDemo() {
       vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_next_item()}, }, "下一条"),
     ]),
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
+      // vNode('span', {className: "fw-bold text-muted"}, "序号"),
+      // (1+(+data_idx_control__main_idx)),
+      data_item?.source_file_name==null ? null : [
+        vNode('span', {className: "fw-bold text-muted"}, "来源文件"),
+        vNode('span', {}, data_item.source_file_name),
+      ],
+      data_item?.sidx==null ? null : [
+        vNode('span', {className: "fw-bold text-muted"}, "手工编号"),
+        data_item.sidx,
+      ],
+    ]),
+    vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       data_item?.head==null ? null : [
         vNode('span', {className: "fw-bold text-muted"}, "标题"),
         vNode('code', {}, data_item.head),
       ],
     ]),
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
-      // vNode('span', {className: "fw-bold text-muted"}, "序号"),
-      // (1+(+data_idx_control__main_idx)),
-    // ]),
-    // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
-      data_item?.sidx==null ? null : [
-        vNode('span', {className: "fw-bold text-muted"}, "手工编号"),
-        data_item.sidx,
-      ],
-    // ]),
-    // vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       vNode('span', {className: "fw-bold text-muted"}, "总字符数"),
       vNode('span', {}, Lodash.sum((data_item?.nlp_outputs??[]).map(it=>it?.text?.length))),
     ]),
@@ -686,6 +688,7 @@ export default function FileReaderDemo() {
         }),
       ],
     ]),
+    true ? null :
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       false ? null : [
         vNode('span', {className: "fw-bold text-muted"}, "操作"),
