@@ -732,7 +732,7 @@ export default function FileReaderDemo() {
     ]),
     vNode(MySegAndPosPanel, {
       data: nlp_data,
-      key: `[${data_idx_control__main_idx}][${data_idx_control__nlp_idx}]${nlp_data?.text}`,
+      key: `pos-[${data_idx_control__main_idx}][${data_idx_control__nlp_idx}]${nlp_data?.text}`,
     }),
 
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
@@ -746,7 +746,7 @@ export default function FileReaderDemo() {
     ]),
     !showVis ? null : vNode(MyViewPanelGroup, {
       data: nlp_data,
-      key: `[${data_idx_control__main_idx}][${data_idx_control__nlp_idx}]${nlp_data?.text}`,
+      key: `vis-[${data_idx_control__main_idx}][${data_idx_control__nlp_idx}]${nlp_data?.text}`,
     }),
   ]);
 
