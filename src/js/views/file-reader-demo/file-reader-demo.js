@@ -767,7 +767,10 @@ export default function FileReaderDemo() {
       vNode(FileReaderDemoCollections, {
         collectedMaterials: collectedMaterials,
         collectedFrags: collectedFrags,
-        onSetCollectedMaterials: set_collectedMaterials,
+        onSetCollectedMaterials: async(nv)=>{
+          set_collectedMaterials(nv);
+          await storage.setItem("collectedMaterials", nv);
+        },
         onSetCollectedFrags: set_collectedFrags,
         appData: {
           current_file_info,
