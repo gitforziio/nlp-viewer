@@ -651,9 +651,13 @@ export default function FileReaderDemo() {
   const FragBlock = ()=>vNode('div', {className: "my-5"}, [
     vNode('h4', {className: "mb-3"}, "当前片段"),
     vNode('div', {className: "my-1 hstack gap-1"}, [
+      vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_previous_item()}, }, "上一条"),
+      vNode('span', {className: "mx-1"}, ``),
       vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_previous_nlp_idx()}, }, "上一个"),
       vNode('span', {}, `第${(1+(+data_idx_control__nlp_idx))}个/共${data_item?.nlp_outputs?.length??0}个`),
       vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_next_nlp_idx()}, }, "下一个"),
+      vNode('span', {className: "mx-1"}, ``),
+      vNode(Button, { theme: "default", size: "small", onClick: ()=>{go_next_item()}, }, "下一条"),
     ]),
     vNode('div', {className: "my-1 hstack gap-2 flex-wrap"}, [
       nlp_data?.text==null ? null : [
