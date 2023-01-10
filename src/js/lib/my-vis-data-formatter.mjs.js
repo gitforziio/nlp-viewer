@@ -313,6 +313,10 @@ const ref_info_dict = {
   },
   'hanlp-pos-ctb': {
     link: "https://hanlp.hankcs.com/docs/annotations/pos/ctb.html",
+    other_links: [
+      "https://blog.csdn.net/qq_19472829/article/details/105656597",
+      "https://www.jianshu.com/p/ae3bf4bc62f4",
+    ],
   },
   'hanlp-pos-pku': {
     link: "https://hanlp.hankcs.com/docs/annotations/pos/pku.html",
