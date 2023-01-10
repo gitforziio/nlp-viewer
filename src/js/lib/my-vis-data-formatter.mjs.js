@@ -303,10 +303,10 @@ const ref_info_dict = {
     link: "https://github.com/fastnlp/fastHan/blob/master/README.md?plain=1#L167",
   },
   'jieba-pos': {
-    link: "",
+    link: "https://github.com/fxsjy/jieba/blob/master/README.md?plain=1#L195",
   },
   'pkuseg-pos': {
-    link: "",
+    link: "https://github.com/lancopku/pkuseg-python/blob/master/tags.txt",
   },
   'ltp-pos': {
     link: "http://ltp.ai/docs/appendix.html#id2",
