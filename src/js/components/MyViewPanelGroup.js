@@ -52,6 +52,9 @@ export default function MyViewPanelGroup(props) {
       vNode('button', { type: "button", className: [ "btn btn-sm", "btn-light", ].join(" "),
         onClick: onUnExpandAll,
       }, "折叠全部"),
+      vNode('button', { type: "button", className: [ "btn btn-sm", "btn-light", ].join(" "),
+        onClick: ()=>{console.log(props?.data);},
+      }, "log"),
     ]),
     vNode(Collapse, {
       // defaultValue: primary_panel_list,
