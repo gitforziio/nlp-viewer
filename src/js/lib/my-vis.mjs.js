@@ -23,6 +23,9 @@
 
 import D3 from '../../../vendor/d3.js';
 
+const console_log = (...args) => {
+  if (false) {console.log(...args);};
+};
 
 const Math_sum = (...args) => {return args.reduce((ss, nn)=>((+ss)+(+nn)), 0);};
 const Math_avg = (...args) => {return Math_sum(...args)/args?.length;};
@@ -596,7 +599,8 @@ const MyVis = class MyVis {
       const unit_idx = unit?.idx ?? unit?.id ?? idx;
       const unit_ = new MyVis.VisElement({
         idx: unit_idx,
-        od: idx,
+        od: unit?.od ?? idx,
+        has_od: unit?.od!=null,
         level: unit?.level,
         depth: unit?.depth,
         text: unit?.text,
@@ -616,22 +620,26 @@ const MyVis = class MyVis {
     // 计算横向位置
     const rank_dict = {};
     const rank_fn = (it, depth=0)=>{
+      console_log(" ");
+      console_log(it.idx);
       // if (depth>2) {
-      //   console.log(depth);
+      //   console_log(depth);
       // };
 
       // 如果没有 spans 属性或者 spans 属性的长度为 0，则将 it 的排名设置为 it.od 或 0
       if (!this.things.spans?.length) {
-        const rank = it?.od??0;
+        const rank = it.has_od ? (it?.od??0) : 0;
         // 将 it 的编号和排名存储到 rank_dict 字典中
         rank_dict[it.idx] = rank;
         it.rank=rank;
+        console_log("od", rank);
         return rank;
       };
       // 如果 rank_dict 字典中已经有了 it 的编号，则直接使用 it 的排名，不再调用 rank_fn 函数
       if (!!rank_dict?.[it.idx]) {
         const rank = rank_dict[it.idx];
         it.rank=rank;
+        console_log("rank_dict", rank);
         return rank;
       };
 
@@ -649,9 +657,11 @@ const MyVis = class MyVis {
 
       // 如果 the_spans 不为空，则计算这些 span 的平均排名，作为 it 的排名
       if (the_spans?.length) {
+        console_log(the_spans);
         const rank = Math_avg(...the_spans.map(span=>(span?.indices?.[0])));
         rank_dict[it.idx] = rank;
         it.rank=rank;
+        console_log("avg the_spans", rank);
         return rank;
       };
 
@@ -664,16 +674,21 @@ const MyVis = class MyVis {
       const target_ranks = target_idxes.map(idx=>{
         // 如果 rank_dict 字典中已经有了某个单元的编号，则直接使用该单元的排名
         if (!!rank_dict?.[idx]) {
+          console_log("rank_dict");
           return rank_dict?.[idx];
         };
         // 如果递归太深，则排名为0
         if (depth > 20) {
+          console_log("递归太深 0");
           return 0;
         };
         // 否则，调用 rank_fn 函数来计算该单元的排名
+        console_log("rank_fn");
         return rank_fn(things.unitDict[idx], (depth+1));
       });
+      console_log(target_ranks);
       const rank = Math_avg(...target_ranks);
+      console_log("avg target_ranks", rank);
       rank_dict[it.idx] = rank;
       it.rank=rank;
       return rank;
@@ -681,12 +696,12 @@ const MyVis = class MyVis {
     things.units.forEach(it=>rank_fn(it));
 
     if (!!things.units.find(it=>it.level!=null)) {
-      console.log("找到了预定义的 level");
+      console_log("找到了预定义的 level");
       return this.things.units;
     };
     // -------- -------- -------- -------- -------- -------- --------
     if (!!things.units.find(it=>it.depth!=null)) {
-      console.log("找到了预定义的 depth");
+      console_log("找到了预定义的 depth");
       const depthes = things.units.map(it=>+(it?.depth??0));
       const max_depth = Math.max(...depthes);
       const min_depth = Math.min(...depthes);
@@ -708,16 +723,21 @@ const MyVis = class MyVis {
     depth_dict[things.units[0]?.idx] = 0;
     const idxes = things.units.map(it=>it.idx);
     const loop = () => {
+      // 记录上一次遍历时已经遍历过的节点数量
       const last_keys_len = Object.keys(depth_dict).length;
       for (const idx of idxes) {
         if (idx in depth_dict) {
+          // 寻找当前节点的所有子节点
           const target_idxes = arcs.filter(arc=>(arc?.source==idx||arc?.source?.idx==idx)).map(arc=>arc?.target?.idx??arc?.target);
+          // 将子节点的深度设置为当前节点深度+1
           target_idxes.forEach(t_idx=>{
             if (!(t_idx in depth_dict)) {
               depth_dict[t_idx] = depth_dict[idx]+1;
             };
           });
+          // 寻找当前节点的所有父节点
           const source_idxes = arcs.filter(arc=>(arc?.target==idx||arc?.target?.idx==idx)).map(arc=>arc?.source?.idx??arc?.source);
+          // 将父节点的深度设置为当前节点深度-1
           source_idxes.forEach(s_idx=>{
             if (!(s_idx in depth_dict)) {
               depth_dict[s_idx] = depth_dict[idx]-1;
@@ -726,22 +746,25 @@ const MyVis = class MyVis {
         };
       };
 
-      const current_keys_len = Object.keys(depth_dict).length;
-      const delta_len = (current_keys_len-last_keys_len);
+      const current_keys_len = Object.keys(depth_dict).length;  // 记录当前遍历时已经遍历过的节点数量
+      const delta_len = (current_keys_len-last_keys_len);  // 计算新增加的 key 的数量
       // console.log(depth_dict);
       // console.log(delta_len);
       if (delta_len>0) {loop();} else {
-        const rest_idxes = idxes.filter(idx=>!(idx in depth_dict));
+        // 如果新增加的 key 数量大于 0，说明还有未遍历的单元需要处理，继续递归 loop
+        // 否则
+        const rest_idxes = idxes.filter(idx=>!(idx in depth_dict));  // 获取所有未处理过的单元的 idx
         if (rest_idxes.length) {
+          // 在未处理过的单元中找到一个没有出边，只有入边的单元
           const new_bottom_idx = rest_idxes.find(idx=>{
             const flag1 = arcs.filter(arc=>(arc?.source==idx||arc?.source?.idx==idx)).length<=0;
             const flag2 = arcs.filter(arc=>(arc?.target==idx||arc?.target?.idx==idx)).length>0;
             return flag1&&flag2;
           });
           if (new_bottom_idx!=null) {
-            depth_dict[new_bottom_idx] = Math.max(...Object.values(depth_dict));
-            if (isNaN(depth_dict[new_bottom_idx])) {depth_dict[new_bottom_idx]=0;};
-            loop();
+            depth_dict[new_bottom_idx] = Math.max(...Object.values(depth_dict));  // 设置它的深度为当前最大深度
+            if (isNaN(depth_dict[new_bottom_idx])) {depth_dict[new_bottom_idx]=0;};  // 如果当前最大深度不是数字，说明没有其它单元，那么将它的深度设置为 0
+            loop();  // 继续递归 loop
           };
         };
       };
@@ -1074,6 +1097,8 @@ const MyVis = class MyVis {
             (``) :
             (`(${datum.type})`)
           );
+      // return `${text_label_part}${type_part}[${(datum?.rank??0)?.toFixed?.(2)}]`;
+      // return `${text_label_part}${type_part}[${(datum?.level??0)?.toFixed?.(2)}]`;
       return `${text_label_part}${type_part}`;
     };
 
@@ -1141,7 +1166,39 @@ const MyVis = class MyVis {
       const link_ry = 0;
 
       const _attrMap = {
+        "Anno": {
+          "rx": link_rx,
+          "ry": link_ry,
+          "x": text_layer_bbox.x-1.5*basic_rx,
+          "y": text_layer_bbox.y-basic_ry,
+          "stroke": "#ff8",
+          "fill": "#ffd",
+        },
+        "InstrSeq": {
+          "rx": link_rx,
+          "ry": link_ry,
+          "x": text_layer_bbox.x-1.5*basic_rx,
+          "y": text_layer_bbox.y-basic_ry,
+          "stroke": "#f88",
+          "fill": "#fdd",
+        },
+        "Instr": {
+          "rx": link_rx,
+          "ry": link_ry,
+          "x": text_layer_bbox.x-1.5*basic_rx,
+          "y": text_layer_bbox.y-basic_ry,
+          "stroke": "#f88",
+          "fill": "#fdd",
+        },
         "Link": {
+          "rx": link_rx,
+          "ry": link_ry,
+          "x": text_layer_bbox.x-1.5*basic_rx,
+          "y": text_layer_bbox.y-basic_ry,
+          "stroke": "#22a",
+          "fill": "#ccf",
+        },
+        "FrameCase": {
           "rx": link_rx,
           "ry": link_ry,
           "x": text_layer_bbox.x-1.5*basic_rx,
@@ -1232,6 +1289,8 @@ const MyVis = class MyVis {
       )
       .attr("data-od", da=>da.od)
       .attr("data-idx", da=>da.idx)
+      .attr("data-depth", da=>da.depth)
+      .attr("data-rank", da=>da.rank)
       .on("mouseenter", event=>{
         const me = d3.select(event.target);
         me.classed("mouse-over", true);
@@ -1890,7 +1949,7 @@ const MyVis = class MyVis {
     // 文块排序
     simulation.force("order-force-chunk",
       MyVis.forceOrdering(this.forced_nodes_and_links.chunk_nodes)
-      .axis("x").key(it=>it.od??0).drift(-4)
+        .axis("x").key(it=>it.od??0).drift(-4)
     );
 
     // // 文本排序
@@ -2052,7 +2111,7 @@ const MyVis = class MyVis {
       });
 
       this._drawArcs();
-      this.resize();
+      // this.resize();
       this.svg_g_root.dispatch("tick", {
         bubbles: true,
         cancelable: true,
@@ -2077,12 +2136,13 @@ const MyVis = class MyVis {
           type: "end",
         },
       });
-      // this.resize();
+      this.resize();
     });
 
     const _dragFn = (sim, dragX=true, dragY=true) => {
       const drag_started = (event, dd) => {
         if (!event.active) {sim.alphaTarget(0.2).restart();};
+        // if (!event.active) {sim.alphaTarget(0.5).restart();};
         if (dragX) {
           dd.ofx = dd?.fx;
           dd._trans_x = dd.x;
@@ -2163,11 +2223,25 @@ const MyVis = class MyVis {
   resize() {
     const root_box = this.svg_g_root.node().getBBox();
     const padding = this.config.padding;
-    this.svg.attr("viewBox", [root_box.x-padding.left, root_box.y-padding.top, root_box.width+padding.left+padding.right, root_box.height+padding.top+padding.bottom]);
-    this.svg.attr("width", root_box.width+padding.left+padding.right).attr("height", root_box.height+padding.top+padding.bottom);
+
+    const widthAttr = root_box.width+padding.left+padding.right;
+    const heightAttr = root_box.height+padding.top+padding.bottom;
+    const viewBoxAttr = [root_box.x-padding.left, root_box.y-padding.top, widthAttr, heightAttr];
+
+    const trans = this.svg.transition().duration(1500)
+      .attr("height", heightAttr)
+      .attr("width", widthAttr)
+      .attr("viewBox", viewBoxAttr)
+      .call(this.zoom.transform, MyVis.D3.zoomIdentity)
+    ;
+
+    // trans.on("end", ()=>{
+    //   this.svg.transition().duration(800).call(this.zoom.transform, MyVis.D3.zoomIdentity);
+    // });
 
     // this.svg.transition().duration(750).call(this.zoom.transform, MyVis.D3.zoomIdentity);
-    this.svg.call(this.zoom.transform, MyVis.D3.zoomIdentity);
+
+    // this.svg.call(this.zoom.transform, MyVis.D3.zoomIdentity);
 
     this.svg_g_root.dispatch("resize", {
       bubbles: true,

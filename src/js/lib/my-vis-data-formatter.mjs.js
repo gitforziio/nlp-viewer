@@ -360,8 +360,43 @@ export function normalize_All(view_data) {
 };
 
 
+export function formatter_List(it) {
+  const group_pairs = Lodash.toPairs(Lodash.groupBy(it.items, "_l"));
+  const that = {...it};
+  that.items = undefined;
+  for (const pair of group_pairs) {
+    if (that[pair[0]]==null) {that[pair[0]]=[]};
+    pair[1].map(xx=>xx._i).forEach(xx=>that[pair[0]].push(xx));
+  };
+  return that;
+};
+
 export function formatter_All(view_data) {
   const list_ = [];
+
+  if (view_data?.by_list != null) {
+    list_.push({
+      header: "",
+      items: [{
+        key: `diagram-by_list-0`,
+        data: formatter_List(view_data?.by_list),
+        sourceData: view_data?.by_list,
+        elementId: `diagram-by_list-0`,
+      }],
+    });
+  };
+
+  if (view_data?.by_standard != null) {
+    list_.push({
+      header: "",
+      items: [{
+        key: `diagram-by_standard-0`,
+        data: view_data?.by_standard,
+        sourceData: view_data?.by_standard,
+        elementId: `diagram-by_standard-0`,
+      }],
+    });
+  };
 
   const step = (data, byWho, tag, list, header, formatter_fn, ref_info) => {
     if (data?.[byWho]?.[tag] != null) {
