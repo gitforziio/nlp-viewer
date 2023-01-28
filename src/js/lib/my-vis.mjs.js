@@ -240,7 +240,7 @@ const MyVis = class MyVis {
     d3.select(`#${elementId}`).selectAll(`svg`).remove();
   }
 
-  async init() {
+  async init(realTimeResize=false) {
     const cfgSlct = MyVis.configSelection;
     const d3 = MyVis.D3;
     const text = this?.data?.text??"";
@@ -358,17 +358,19 @@ const MyVis = class MyVis {
     // const curve_drawer = d3.line().curve(d3.curveCatmullRom.alpha(0.125));
     // this.curve_drawer = curve_drawer;
 
-    const zoom_fn = MyVis.D3.zoom().on("zoom", (event)=>{
+    const 缩放行为的处理函数 = (event)=>{
       const tran = event.transform;
       this.svg_g_root.attr("transform", tran);
-    });
-    zoom_fn.clickDistance(8);
-    this.svg.call(zoom_fn);
-    this.svg.call(zoom_fn.transform, MyVis.D3.zoomIdentity);
-    this.zoom = zoom_fn;
+    };
+    const zoom_behavior = MyVis.D3.zoom();
+    zoom_behavior.on("zoom", 缩放行为的处理函数);
+    zoom_behavior.clickDistance(8);
+    this.svg.call(zoom_behavior);
+    this.svg.call(zoom_behavior.transform, MyVis.D3.zoomIdentity);
+    this.zoom = zoom_behavior;
 
     await d3.select(`#${elementId}`).node().append(this.svg.node());
-    this.draw();
+    this.draw(realTimeResize);
 
   }  // end init
 
@@ -376,7 +378,7 @@ const MyVis = class MyVis {
   //   this.draw();
   // }
 
-  draw() {
+  draw(realTimeResize=false) {
     // 告诉浏览器用此函数更新动画
     // requestAnimationFrame( ()=>{this.draw();} );
 
@@ -396,7 +398,7 @@ const MyVis = class MyVis {
     this._drawUnits();
     this._drawArcs();
 
-    this._makeAndDrawForces();
+    this._makeAndDrawForces(realTimeResize);
 
     // https://github.com/d3/d3-shape/blob/v3.1.0/README.md#link
     // https://github.com/d3/d3-shape/blob/v3.1.0/README.md#symbol
@@ -621,14 +623,14 @@ const MyVis = class MyVis {
     const rank_dict = {};
     const rank_fn = (it, depth=0)=>{
       console_log(" ");
-      console_log(it.idx);
+      console_log(it?.idx);
       // if (depth>2) {
       //   console_log(depth);
       // };
 
       // 如果没有 spans 属性或者 spans 属性的长度为 0，则将 it 的排名设置为 it.od 或 0
       if (!this.things.spans?.length) {
-        const rank = it.has_od ? (it?.od??0) : 0;
+        const rank = it?.has_od ? (it?.od??0) : 0;
         // 将 it 的编号和排名存储到 rank_dict 字典中
         rank_dict[it.idx] = rank;
         it.rank=rank;
@@ -1183,6 +1185,14 @@ const MyVis = class MyVis {
           "fill": "#fdd",
         },
         "Instr": {
+          "rx": link_rx,
+          "ry": link_ry,
+          "x": text_layer_bbox.x-1.5*basic_rx,
+          "y": text_layer_bbox.y-basic_ry,
+          "stroke": "#f88",
+          "fill": "#fdd",
+        },
+        "Opera": {
           "rx": link_rx,
           "ry": link_ry,
           "x": text_layer_bbox.x-1.5*basic_rx,
@@ -1907,7 +1917,7 @@ const MyVis = class MyVis {
 
 
 
-  _makeAndDrawForces() {
+  _makeAndDrawForces(realTimeResize=false) {
     const SELF = this;
     const d3 = MyVis.D3;
     // this._makeForcedNodesAndLinks();
@@ -2111,7 +2121,7 @@ const MyVis = class MyVis {
       });
 
       this._drawArcs();
-      // this.resize();
+      if (realTimeResize) {this.resize(realTimeResize);};
       this.svg_g_root.dispatch("tick", {
         bubbles: true,
         cancelable: true,
@@ -2141,8 +2151,8 @@ const MyVis = class MyVis {
 
     const _dragFn = (sim, dragX=true, dragY=true) => {
       const drag_started = (event, dd) => {
-        if (!event.active) {sim.alphaTarget(0.2).restart();};
-        // if (!event.active) {sim.alphaTarget(0.5).restart();};
+        // if (!event.active) {sim.alphaTarget(0.2).restart();};
+        if (!event.active) {sim.alphaTarget(0.05).restart();};
         if (dragX) {
           dd.ofx = dd?.fx;
           dd._trans_x = dd.x;
@@ -2220,24 +2230,72 @@ const MyVis = class MyVis {
     return this.simulation;
   }
 
-  resize() {
+  resize(realTimeResize=false) {
     const root_box = this.svg_g_root.node().getBBox();
     const padding = this.config.padding;
 
-    const widthAttr = root_box.width+padding.left+padding.right;
-    const heightAttr = root_box.height+padding.top+padding.bottom;
-    const viewBoxAttr = [root_box.x-padding.left, root_box.y-padding.top, widthAttr, heightAttr];
+    const parent_width = this.svg?.node?.()?.parentNode?.getBoundingClientRect?.()?.width;
 
-    const trans = this.svg.transition().duration(1500)
+    const viewBoxAttr = [
+      root_box.x-padding.left,
+      root_box.y-padding.top,
+      root_box.width+padding.left+padding.right,
+      root_box.height+padding.top+padding.bottom,
+    ];
+
+    let widthAttr = root_box.width+padding.left+padding.right;
+    let heightAttr = root_box.height+padding.top+padding.bottom;
+
+    let rrrr = 1;
+    let xxxx = root_box.x + 0.5*root_box.width + 0.5*(padding.left+padding.right);
+    let yyyy = root_box.y + 0.5*root_box.height + 0.5*(padding.top+padding.bottom);
+    console.log('root_box:', root_box);
+    // let xxxx = - root_box.width*0.5 + 0.5*(padding.left+padding.right);
+    // let yyyy = - root_box.height + 0.5*(padding.top+padding.bottom);
+
+    if (parent_width!=null && widthAttr > parent_width) {
+      const rt = heightAttr/widthAttr;
+      const new_widthAttr = Math.floor(parent_width);
+      rrrr = new_widthAttr/widthAttr;
+      widthAttr = new_widthAttr;
+      const new_heightAttr = Math.ceil(new_widthAttr * rt);
+      heightAttr = new_heightAttr;
+      // xxxx = root_box.x + 0.5*new_root_box_width + 0.5*(padding.left+padding.right);
+      // yyyy = root_box.y + 0.5*new_root_box_height + 0.5*(padding.top+padding.bottom);
+    };
+
+    // if (parent_width!=null && root_box.width > parent_width) {
+    //   const rt = root_box.height/root_box.width;
+    //   const new_root_box_width = Math.floor(parent_width);
+    //   widthAttr = new_root_box_width+padding.left+padding.right;
+    //   const new_root_box_height = Math.ceil(new_root_box_width * rt);
+    //   heightAttr = new_root_box_height+padding.top+padding.bottom;
+    //   rrrr = new_root_box_width/root_box.width;
+    //   xxxx = root_box.x + 0.5*new_root_box_width + 0.5*(padding.left+padding.right);
+    //   yyyy = root_box.y + 0.5*new_root_box_height + 0.5*(padding.top+padding.bottom);
+    //   // xxxx = - new_root_box_width*0.5 + 0.5*(padding.left+padding.right);
+    //   // yyyy = - new_root_box_height + 0.5*(padding.top+padding.bottom);
+    // };
+
+    const this_svg = realTimeResize ? this.svg : this.svg.transition().duration(1500);
+    this_svg
       .attr("height", heightAttr)
       .attr("width", widthAttr)
       .attr("viewBox", viewBoxAttr)
       .call(this.zoom.transform, MyVis.D3.zoomIdentity)
+      // .call(this.zoom.scaleTo, 1)
+      // .call(this.zoom.transform, MyVis.D3.zoomIdentity.translate(xxxx, yyyy).scale(rrrr))
     ;
 
-    // trans.on("end", ()=>{
-    //   this.svg.transition().duration(800).call(this.zoom.transform, MyVis.D3.zoomIdentity);
-    // });
+    // if (!realTimeResize) {
+    //   this_svg.on("end", ()=>{
+    //     const zoom_behavior = this.zoom;
+    //     console.log("rrrr:", rrrr);
+    //     this.svg.call(zoom_behavior.scaleTo, rrrr);
+    //     // MyVis.D3.zoom().scaleTo(zoom_behavior, rrrr).event();
+    //     // this.svg.transition().duration(800).call(this.zoom.transform, MyVis.D3.zoomIdentity);
+    //   });
+    // };
 
     // this.svg.transition().duration(750).call(this.zoom.transform, MyVis.D3.zoomIdentity);
 

@@ -74,7 +74,7 @@ export default function MyViewPanel(props) {
       &&(myVis?.data?.nodes?.length??0)<40
     ) {
       myVis.clean();
-      myVis.init();
+      myVis.init(!true);
       set_alt("");
     } else {
       set_alt("节点较多，请点击「重新绘制」手动加载");
@@ -91,7 +91,7 @@ export default function MyViewPanel(props) {
   //     // console.log('D3?.select?.(elementId)?.node?.():\n', D3?.select?.(elementId)?.node?.());
   //     console.log("😄");
   //     if (myVis.data!=null) {
-  //       await myVis.init();
+  //       await myVis.init(!true);
   //     };
   //   }, 3000);
 
@@ -202,7 +202,7 @@ export default function MyViewPanel(props) {
         ].join(" "),
         onClick: async()=>{
           await myVis.clean();
-          await myVis.init();
+          await myVis.init(!true);
           set_alt("");
           // console.log(myVis);
           // console.log(myVis?.svg_g_root);
