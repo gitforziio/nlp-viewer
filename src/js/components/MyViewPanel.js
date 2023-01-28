@@ -43,6 +43,22 @@ function svgToPng(svgElement, width, height, callback=((blob)=>{console.log("blo
 
 export default function MyViewPanel(props) {
 
+  const myVisEventHandlerInfoList = [
+    // {name: "end", fn: ()=>{console.log("end");}},
+  ];
+  const myVisWrapperRef = useRef(null);
+  useEffect(()=>{
+    const myVisWrapper = myVisWrapperRef.current;
+    for (const info of myVisEventHandlerInfoList) {
+      myVisWrapper.addEventListener(info.name, info.fn);
+    };
+    return ()=>{
+      for (const info of myVisEventHandlerInfoList) {
+        myVisWrapper.removeEventListener(info.name, info.fn);
+      };
+    };
+  }, []);
+
   const [elementId, set_elementId] = useState(props?.elementId??"diagram");
 
   const [alt, set_alt] = useState("");
@@ -55,6 +71,10 @@ export default function MyViewPanel(props) {
 
       level_height: 70,
       base_height: 10,
+
+      alphaTarget: 0,
+      alphaDecay: 0.05, // 0.1,  // 力道衰减率
+      velocityDecay: 0.3, // 0.3,  // 速度衰减率 越大结束越快 // 每个 tick 速度 = 速度*(1-速度衰减率)
     },
     data: props?.data??{
       text: "",
@@ -74,7 +94,7 @@ export default function MyViewPanel(props) {
       &&(myVis?.data?.nodes?.length??0)<40
     ) {
       myVis.clean();
-      myVis.init(!true);
+      myVis.init(true);
       set_alt("");
     } else {
       set_alt("节点较多，请点击「重新绘制」手动加载");
@@ -91,7 +111,7 @@ export default function MyViewPanel(props) {
   //     // console.log('D3?.select?.(elementId)?.node?.():\n', D3?.select?.(elementId)?.node?.());
   //     console.log("😄");
   //     if (myVis.data!=null) {
-  //       await myVis.init(!true);
+  //       await myVis.init(true);
   //     };
   //   }, 3000);
 
@@ -147,6 +167,7 @@ export default function MyViewPanel(props) {
     vNode('div', {className: "diagram-wrap my-2"}, [
       vNode('div', {}, [
         vNode('diagram', {
+          ref: myVisWrapperRef,
           id: elementId, className: "diagram",
           // onClick: ()=>{
           //   MessagePlugin.info('onClick');
@@ -202,7 +223,7 @@ export default function MyViewPanel(props) {
         ].join(" "),
         onClick: async()=>{
           await myVis.clean();
-          await myVis.init(!true);
+          await myVis.init(true);
           set_alt("");
           // console.log(myVis);
           // console.log(myVis?.svg_g_root);
