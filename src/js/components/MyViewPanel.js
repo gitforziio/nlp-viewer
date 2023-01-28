@@ -44,7 +44,34 @@ function svgToPng(svgElement, width, height, callback=((blob)=>{console.log("blo
 export default function MyViewPanel(props) {
 
   const myVisEventHandlerInfoList = [
-    // {name: "end", fn: ()=>{console.log("end");}},
+    {name: "end", fn: (event)=>{
+      console.log("end");
+      console.log(event);
+    }},
+    // {name: "resize", fn: (event)=>{
+    //   console.log("resize");
+    //   console.log(event);
+    // }},
+    // {name: "tick", fn: (event)=>{
+    //   console.log("tick");
+    //   console.log(event);
+    // }},
+    // {name: "drag", fn: (event)=>{
+    //   console.log("drag");
+    //   console.log(event);
+    // }},
+    // {name: "drag-move", fn: (event)=>{
+    //   console.log("drag-move");
+    //   console.log(event);
+    // }},
+    {name: "drag-start", fn: (event)=>{
+      console.log("drag-start");
+      console.log(event);
+    }},
+    {name: "drag-end", fn: (event)=>{
+      console.log("drag-end");
+      console.log(event);
+    }},
   ];
   const myVisWrapperRef = useRef(null);
   useEffect(()=>{
@@ -101,26 +128,6 @@ export default function MyViewPanel(props) {
     };
   }, []);
 
-  // useEffect(async()=>{
-  //   console.log("[myVis.data, myVis.config.elementId] changed");
-
-  //   // console.log(myVis.config.elementId);
-  //   // console.log('D3?.select?.(elementId)?.node?.():\n', D3?.select?.(elementId)?.node?.());
-
-  //   const timeoutIdx = setTimeout(async()=>{
-  //     // console.log('D3?.select?.(elementId)?.node?.():\n', D3?.select?.(elementId)?.node?.());
-  //     console.log("😄");
-  //     if (myVis.data!=null) {
-  //       await myVis.init(true);
-  //     };
-  //   }, 3000);
-
-  //   return async()=>{
-  //     cleartimeout(timeoutIdx);
-  //   };
-
-  // }, [myVis.data, myVis.config.elementId]);
-
   const [theVis, set_theVis] = useState(myVis);
 
   const theSVG = useRef(null);
@@ -169,40 +176,6 @@ export default function MyViewPanel(props) {
         vNode('diagram', {
           ref: myVisWrapperRef,
           id: elementId, className: "diagram",
-          // onClick: ()=>{
-          //   MessagePlugin.info('onClick');
-          //   console.log("onClick");
-          // },
-          // ontick: ()=>{
-          //   // MessagePlugin.info('ontick');
-          //   console.log("ontick");
-          //   myVis.resize();
-          // },
-          // onTick: ()=>{
-          //   // MessagePlugin.info('onTick');
-          //   console.log("onTick");
-          //   myVis.resize();
-          // },
-          // onEnd: ()=>{
-          //   MessagePlugin.info('onEnd');
-          //   console.log("onEnd");
-          // },
-          // onDragStart: ()=>{
-          //   MessagePlugin.info('onDragStart');
-          //   console.log("onDragStart");
-          // },
-          // onDrag: ()=>{
-          //   // MessagePlugin.info('onDrag');
-          //   // console.log("onDrag");
-          // },
-          // onDragEnd: ()=>{
-          //   MessagePlugin.info('onDragEnd');
-          //   console.log("onDragEnd");
-          // },
-          // onResize: ()=>{
-          //   MessagePlugin.info('onResize');
-          //   // console.log("onResize");
-          // },
         }),
         vNode('div', {
           className: [

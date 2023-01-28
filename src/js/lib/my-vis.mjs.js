@@ -2263,11 +2263,6 @@ const MyVis = class MyVis {
     let heightAttr = root_box.height+padding.top+padding.bottom;
 
     let rrrr = 1;
-    // let xxxx = root_box.x + 0.5*root_box.width + 0.5*(padding.left+padding.right);
-    // let yyyy = root_box.y + 0.5*root_box.height + 0.5*(padding.top+padding.bottom);
-    // console.log('root_box:', root_box);
-    // let xxxx = - root_box.width*0.5 + 0.5*(padding.left+padding.right);
-    // let yyyy = - root_box.height + 0.5*(padding.top+padding.bottom);
 
     if (parent_width!=null && widthAttr > parent_width) {
       const rt = heightAttr/widthAttr;
@@ -2276,22 +2271,7 @@ const MyVis = class MyVis {
       widthAttr = new_widthAttr;
       const new_heightAttr = Math.ceil(new_widthAttr * rt);
       heightAttr = new_heightAttr;
-      // xxxx = root_box.x + 0.5*new_root_box_width + 0.5*(padding.left+padding.right);
-      // yyyy = root_box.y + 0.5*new_root_box_height + 0.5*(padding.top+padding.bottom);
     };
-
-    // if (parent_width!=null && root_box.width > parent_width) {
-    //   const rt = root_box.height/root_box.width;
-    //   const new_root_box_width = Math.floor(parent_width);
-    //   widthAttr = new_root_box_width+padding.left+padding.right;
-    //   const new_root_box_height = Math.ceil(new_root_box_width * rt);
-    //   heightAttr = new_root_box_height+padding.top+padding.bottom;
-    //   rrrr = new_root_box_width/root_box.width;
-    //   xxxx = root_box.x + 0.5*new_root_box_width + 0.5*(padding.left+padding.right);
-    //   yyyy = root_box.y + 0.5*new_root_box_height + 0.5*(padding.top+padding.bottom);
-    //   // xxxx = - new_root_box_width*0.5 + 0.5*(padding.left+padding.right);
-    //   // yyyy = - new_root_box_height + 0.5*(padding.top+padding.bottom);
-    // };
 
     const this_svg = realTimeResize ? this.svg : this.svg.transition().duration(1500);
     this_svg
@@ -2299,23 +2279,9 @@ const MyVis = class MyVis {
       .attr("width", widthAttr)
       .attr("viewBox", viewBoxAttr)
       .call(this.zoom.transform, MyVis.D3.zoomIdentity)
-      // .call(this.zoom.scaleTo, 1)
-      // .call(this.zoom.transform, MyVis.D3.zoomIdentity.translate(xxxx, yyyy).scale(rrrr))
     ;
 
-    // if (!realTimeResize) {
-    //   this_svg.on("end", ()=>{
-    //     const zoom_behavior = this.zoom;
-    //     console.log("rrrr:", rrrr);
-    //     this.svg.call(zoom_behavior.scaleTo, rrrr);
-    //     // MyVis.D3.zoom().scaleTo(zoom_behavior, rrrr).event();
-    //     // this.svg.transition().duration(800).call(this.zoom.transform, MyVis.D3.zoomIdentity);
-    //   });
-    // };
-
     // this.svg.transition().duration(750).call(this.zoom.transform, MyVis.D3.zoomIdentity);
-
-    // this.svg.call(this.zoom.transform, MyVis.D3.zoomIdentity);
 
     this.svg_g_root.dispatch("resize", {
       bubbles: true,
