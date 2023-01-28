@@ -199,6 +199,15 @@ const MyVis = class MyVis {
   constructor(wrap) {
     this.config = {
 
+      alphaTarget: wrap?.config?.alphaTarget ?? 0,
+      alphaDecay: wrap?.config?.alphaDecay ?? 0.1,
+      velocityDecay: wrap?.config?.velocityDecay ?? 0.3,
+
+      realTimeResize: wrap?.config?.realTimeResize ?? false,
+      realTimeResizeState: false,
+      // TODO: 改名
+      // realTimeResize 控制的东西很有限 不过现在一两句话说不清
+
       level_height: wrap?.config?.level_height ?? 100,
       base_height: wrap?.config?.base_height ?? 70,
 
@@ -1927,6 +1936,9 @@ const MyVis = class MyVis {
       ...this.forced_nodes_and_links.unit_nodes,
     ]);
 
+    this.config.realTimeResize = realTimeResize;
+    this.config.realTimeResizeState = realTimeResize;
+
     const alphaTarget = 0;
     simulation.alphaTarget(alphaTarget);
 
@@ -2121,7 +2133,7 @@ const MyVis = class MyVis {
       });
 
       this._drawArcs();
-      if (realTimeResize) {this.resize(realTimeResize);};
+      if (this.config.realTimeResizeState) {this.resize(this.config.realTimeResizeState);};
       this.svg_g_root.dispatch("tick", {
         bubbles: true,
         cancelable: true,
@@ -2133,9 +2145,10 @@ const MyVis = class MyVis {
 
 
     // https://github.com/d3/d3-force/blob/v3.0.0/README.md#simulation_alpha
-    // simulation.alphaDecay(0.05);
-    simulation.alphaDecay(0.1);  // default 0.0228… = 1 - pow(0.001, 1 / 300) where 0.001 is the default minimum alpha.
-    simulation.velocityDecay(0.3);  // defaults to 0.4 . | The decay factor is akin to atmospheric friction; after the application of any forces during a tick, each node’s velocity is multiplied by 1 - decay. As with lowering the alpha decay rate, less velocity decay may converge on a better solution, but risks numerical instabilities and oscillation.
+    // simulation.alphaDecay(0.1);  // default 0.0228… = 1 - pow(0.001, 1 / 300) where 0.001 is the default minimum alpha.
+    // simulation.velocityDecay(0.3);  // defaults to 0.4 . | The decay factor is akin to atmospheric friction; after the application of any forces during a tick, each node’s velocity is multiplied by 1 - decay. As with lowering the alpha decay rate, less velocity decay may converge on a better solution, but risks numerical instabilities and oscillation.
+    simulation.alphaDecay(this.config.alphaDecay);
+    simulation.velocityDecay(this.config.velocityDecay);
 
 
     simulation.on("end", ()=>{
@@ -2146,7 +2159,8 @@ const MyVis = class MyVis {
           type: "end",
         },
       });
-      this.resize();
+      this.config.realTimeResizeState = this.config.realTimeResize;
+      this.resize();  // 此时不需要实时resize 而总是需要渐变resize
     });
 
     const _dragFn = (sim, dragX=true, dragY=true) => {
@@ -2183,6 +2197,7 @@ const MyVis = class MyVis {
       };
       return MyVis.D3.drag()
       .on("start", (event, dd)=>{
+        this.config.realTimeResizeState = false;
         drag_started(event, dd);
         this.svg_g_root.dispatch("drag-start", {
           bubbles: true,
@@ -2210,6 +2225,7 @@ const MyVis = class MyVis {
         });
       })
       .on("end", (event, dd)=>{
+        // this.config.realTimeResizeState = this.config.realTimeResize;
         drag_ended(event, dd);
         this.svg_g_root.dispatch("drag-end", {
           bubbles: true,
@@ -2247,9 +2263,9 @@ const MyVis = class MyVis {
     let heightAttr = root_box.height+padding.top+padding.bottom;
 
     let rrrr = 1;
-    let xxxx = root_box.x + 0.5*root_box.width + 0.5*(padding.left+padding.right);
-    let yyyy = root_box.y + 0.5*root_box.height + 0.5*(padding.top+padding.bottom);
-    console.log('root_box:', root_box);
+    // let xxxx = root_box.x + 0.5*root_box.width + 0.5*(padding.left+padding.right);
+    // let yyyy = root_box.y + 0.5*root_box.height + 0.5*(padding.top+padding.bottom);
+    // console.log('root_box:', root_box);
     // let xxxx = - root_box.width*0.5 + 0.5*(padding.left+padding.right);
     // let yyyy = - root_box.height + 0.5*(padding.top+padding.bottom);
 
