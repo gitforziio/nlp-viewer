@@ -69,6 +69,10 @@ const MyVis = class MyVis {
     return selection;
   }
 
+  static selectChildNodes = function (datum) {
+    console.log(datum);
+  }
+
   static VisElement = class VisElement {
     constructor(seed) {
       this.__seed__ = seed;
@@ -1322,6 +1326,18 @@ const MyVis = class MyVis {
         me.classed("mouse-over", false);
         me.attr("filter", null)
       })
+      .on("click", event=>{
+        const me = d3.select(event.target);
+        me.dispatch("click-unit", {
+          bubbles: true,
+          cancelable: true,
+          detail: {
+            type: "click-unit",
+            event: event,
+            datum: me.datum(),
+          },
+        });
+      })
     ;
 
     // const unit_circles = xx;
@@ -2244,6 +2260,14 @@ const MyVis = class MyVis {
 
     this.simulation = simulation;
     return this.simulation;
+  }
+
+  fineTuning() {
+    this.config.realTimeResizeState = false;
+    this.simulation.alphaTarget(this.config.dragAlphaTarget).restart();
+    setTimeout(()=>{
+      this.simulation.alphaTarget(this.config.alphaTarget);
+    }, 50);
   }
 
   resize(realTimeResize=false) {

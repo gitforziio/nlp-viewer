@@ -43,7 +43,66 @@ function svgToPng(svgElement, width, height, callback=((blob)=>{console.log("blo
 
 export default function MyViewPanel(props) {
 
+  const [elementId, set_elementId] = useState(props?.elementId??"diagram");
+
+  const [alt, set_alt] = useState("");
+
+  const myVis = new MyVis({
+    config: {
+      window: window,
+      document: document,
+      elementId: elementId,
+
+      level_height: 70,
+      base_height: 10,
+
+      alphaTarget: 0,
+      alphaDecay: 0.05, // 0.1,  // 力道衰减率
+      velocityDecay: 0.3, // 0.3,  // 速度衰减率 越大结束越快 // 每个 tick 速度 = 速度*(1-速度衰减率)
+    },
+    data: props?.data??{
+      text: "",
+      entities: [],
+      relations: [],
+      attributes: [
+        // Format: [${ID}, ${TYPE}, ${TARGET}],
+      ],
+    },
+  });
+
+  const [theVis, set_theVis] = useState(myVis);
+
+  useEffect(()=>{
+    if (
+      true
+      &&(theVis?.data?.tokens?.length??0)<20
+      &&(theVis?.data?.spans?.length??0)<20
+      &&(theVis?.data?.nodes?.length??0)<40
+    ) {
+      theVis.clean();
+      theVis.init(true);
+      set_alt("");
+    } else {
+      set_alt("节点较多，请点击「重新绘制」手动加载");
+    };
+  }, []);
+
   const myVisEventHandlerInfoList = [
+    {name: "click-unit", fn: (event)=>{
+      console.log("click-unit");
+      const datum = event?.detail?.datum;
+      // console.log(datum);
+      const selectChildNodes = Object.getPrototypeOf(theVis)?.constructor?.selectChildNodes;
+      // console.log(selectChildNodes);
+      selectChildNodes?.(datum);
+
+      // console.log(event);
+      // console.log(myVis);
+      // console.log(myVis.things);
+      // console.log(theVis);
+      // console.log(theVis.things);
+      // const D3 = Object.getPrototypeOf(theVis)?.constructor?.D3;
+    }},
     {name: "end", fn: (event)=>{
       // console.log("end");
       // console.log(event);
@@ -85,52 +144,6 @@ export default function MyViewPanel(props) {
       };
     };
   }, []);
-
-  const [elementId, set_elementId] = useState(props?.elementId??"diagram");
-
-  const [alt, set_alt] = useState("");
-
-  const myVis = new MyVis({
-    config: {
-      window: window,
-      document: document,
-      elementId: elementId,
-
-      level_height: 70,
-      base_height: 10,
-
-      alphaTarget: 0,
-      alphaDecay: 0.05, // 0.1,  // 力道衰减率
-      velocityDecay: 0.3, // 0.3,  // 速度衰减率 越大结束越快 // 每个 tick 速度 = 速度*(1-速度衰减率)
-    },
-    data: props?.data??{
-      text: "",
-      entities: [],
-      relations: [],
-      attributes: [
-        // Format: [${ID}, ${TYPE}, ${TARGET}],
-      ],
-    },
-  });
-
-  useEffect(()=>{
-    if (
-      true
-      &&(myVis?.data?.tokens?.length??0)<20
-      &&(myVis?.data?.spans?.length??0)<20
-      &&(myVis?.data?.nodes?.length??0)<40
-    ) {
-      myVis.clean();
-      myVis.init(true);
-      set_alt("");
-    } else {
-      set_alt("节点较多，请点击「重新绘制」手动加载");
-    };
-  }, []);
-
-  const [theVis, set_theVis] = useState(myVis);
-
-  const theSVG = useRef(null);
 
   const showJson = async(flag="data", indent=undefined)=>{
     const myDialog = DialogPlugin({
@@ -195,12 +208,12 @@ export default function MyViewPanel(props) {
           "btn-outline-secondary",
         ].join(" "),
         onClick: async()=>{
-          await myVis.clean();
-          await myVis.init(true);
+          await theVis.clean();
+          await theVis.init(true);
           set_alt("");
-          // console.log(myVis);
-          // console.log(myVis?.svg_g_root);
-          set_theVis(myVis);
+          // console.log(theVis);
+          // console.log(theVis?.svg_g_root);
+          set_theVis(theVis);
         },
       }, "重新绘制")),
       vNode(Tooltip, {
@@ -219,6 +232,18 @@ export default function MyViewPanel(props) {
           theVis.resize();
         },
       }, "调整布局")),
+      vNode(Tooltip, {
+        content: "微微扰动布局，使节点之间分布更合适",
+      }, vNode('button', {
+        type: "button",
+        className: [
+          "btn btn-sm",
+          "btn-outline-secondary",
+        ].join(" "),
+        onClick: ()=>{
+          theVis.fineTuning();
+        },
+      }, "微扰布局")),
       vNode(Tooltip, {
         content: "查看针对可视化工具处理之后的json格式数据",
       }, vNode('button', {
