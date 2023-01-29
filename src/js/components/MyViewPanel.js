@@ -45,8 +45,8 @@ export default function MyViewPanel(props) {
 
   const myVisEventHandlerInfoList = [
     {name: "end", fn: (event)=>{
-      console.log("end");
-      console.log(event);
+      // console.log("end");
+      // console.log(event);
     }},
     // {name: "resize", fn: (event)=>{
     //   console.log("resize");
@@ -65,12 +65,12 @@ export default function MyViewPanel(props) {
     //   console.log(event);
     // }},
     {name: "drag-start", fn: (event)=>{
-      console.log("drag-start");
-      console.log(event);
+      // console.log("drag-start");
+      // console.log(event);
     }},
     {name: "drag-end", fn: (event)=>{
-      console.log("drag-end");
-      console.log(event);
+      // console.log("drag-end");
+      // console.log(event);
     }},
   ];
   const myVisWrapperRef = useRef(null);
