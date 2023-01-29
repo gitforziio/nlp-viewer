@@ -200,6 +200,7 @@ const MyVis = class MyVis {
     this.config = {
 
       alphaTarget: wrap?.config?.alphaTarget ?? 0,
+      dragAlphaTarget: wrap?.config?.dragAlphaTarget ?? 0.05,  // 0.2  0.05
       alphaDecay: wrap?.config?.alphaDecay ?? 0.1,
       velocityDecay: wrap?.config?.velocityDecay ?? 0.3,
 
@@ -1939,8 +1940,8 @@ const MyVis = class MyVis {
     this.config.realTimeResize = realTimeResize;
     this.config.realTimeResizeState = realTimeResize;
 
-    const alphaTarget = 0;
-    simulation.alphaTarget(alphaTarget);
+    // const alphaTarget = 0;
+    simulation.alphaTarget(this.config.alphaTarget);
 
     // 文本和单元之间的弹簧力
     simulation
@@ -2165,8 +2166,7 @@ const MyVis = class MyVis {
 
     const _dragFn = (sim, dragX=true, dragY=true) => {
       const drag_started = (event, dd) => {
-        // if (!event.active) {sim.alphaTarget(0.2).restart();};
-        if (!event.active) {sim.alphaTarget(0.05).restart();};
+        if (!event.active) {sim.alphaTarget(this.config.dragAlphaTarget).restart();};
         if (dragX) {
           dd.ofx = dd?.fx;
           dd._trans_x = dd.x;
@@ -2191,7 +2191,7 @@ const MyVis = class MyVis {
         // console.log(dd);
       };
       const drag_ended = (event, dd) => {
-        if (!event.active) {sim.alphaTarget(alphaTarget);};
+        if (!event.active) {sim.alphaTarget(this.config.alphaTarget);};
         if (dragX) {dd.fx = dd?.ofx!=null ? dd.fx : null;};
         if (dragY) {dd.fy = dd?.ofy!=null ? dd.fy : null;};
       };
