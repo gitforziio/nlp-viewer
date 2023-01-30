@@ -119,7 +119,7 @@ export default function MyViewPanel(props) {
         };
       };
 
-      for (const set of [" ", "span_links", "child_unit_links"]) {
+      for (const set of ["chars", "spans", "child_units", "span_links", "child_unit_links"]) {
         for (const it of (relatedThings?.[set]??[])) {
           it.selected.attr("data-involved", true);
           // it.state_involved = true;
@@ -263,7 +263,7 @@ export default function MyViewPanel(props) {
         onClick: ()=>{
           theVis.resize();
         },
-      }, "调整布局")),
+      }, "适应画布")),
       vNode(Tooltip, {
         content: "微微扰动布局，使节点之间分布更合适",
       }, vNode('button', {

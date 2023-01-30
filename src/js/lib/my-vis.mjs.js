@@ -70,15 +70,38 @@ const MyVis = class MyVis {
   }
 
   static getRelatedThings = function (vis, datum) {
-    const span_links = vis?.forced_nodes_and_links?.span_unit_links?.filter?.(it=>it?.target==datum);
-    const child_unit_links = vis?.forced_nodes_and_links?.unit_unit_links?.filter?.(it=>it?.source==datum);
-    const parent_unit_links = vis?.forced_nodes_and_links?.unit_unit_links?.filter?.(it=>it?.target==datum);
-    return {
+    const things = {
       self: datum,
-      span_links,
-      child_unit_links,
-      parent_unit_links,
+      span_links: vis?.forced_nodes_and_links?.span_unit_links?.filter?.(it=>it?.target==datum),
+      child_unit_links: vis?.forced_nodes_and_links?.unit_unit_links?.filter?.(it=>it?.source==datum),
+      parent_unit_links: vis?.forced_nodes_and_links?.unit_unit_links?.filter?.(it=>it?.target==datum),
     };
+    things.spans = things.span_links.map(it=>it?.source).filter(it=>it!=null);
+    things.child_units = things.child_unit_links.map(it=>it?.target).filter(it=>it!=null);
+    things.parent_units = things.parent_unit_links.map(it=>it?.source).filter(it=>it!=null);
+
+    for (const child_unit of things.child_units) {
+      const child_things = MyVis.getRelatedThings(vis, child_unit);
+      for (const key of [
+        "span_links", "child_unit_links",
+        "spans", "child_units",
+      ]) {
+        for (const item of child_things[key]) {
+          if (!things[key].includes(item)) {
+            things[key].push(item);
+          };
+        };
+      };
+    };
+    things.chars = things.spans.map(
+      it=>it.indices.map(
+        xx=>vis?.things?.charDict?.[xx]
+      ).filter(
+        xx=>xx!=null
+      )
+    ).flat();
+
+    return things;
 
     // span_links.forEach(it=>{
     //   it.selected.dispatch("involved", {
@@ -223,16 +246,16 @@ const MyVis = class MyVis {
     this.config = {
 
       svgStyle: wrap?.config?.svgStyle ?? [
-        `g.d3vis-chart-root[data-involving] :is(text, rect, circle) {
+        `g.d3vis-chart-root[data-involving] :is(tspan, text:not(.chunk-text), rect, circle) {
           opacity: 0.5;
-        }
-        g.d3vis-chart-root[data-involving] [data-involved="true"] :is(text, rect, circle) {
+        }`,
+        `g.d3vis-chart-root[data-involving] [data-involved="true"] :is(tspan, text:not(.chunk-text), rect, circle) {
           opacity: 1;
         }
-        g.d3vis-chart-root[data-involving] [data-involved="true"] :is(text, rect, circle) {
+        g.d3vis-chart-root[data-involving] [data-involved="true"] :is(tspan, text:not(.chunk-text), rect, circle) {
           opacity: 1;
         }
-        g.d3vis-chart-root[data-involving] :is(text, path, rect, circle)[data-involved="true"] {
+        g.d3vis-chart-root[data-involving] :is(tspan, text:not(.chunk-text), rect, circle)[data-involved="true"] {
           opacity: 1;
         }`,
         `g.arc-span-unit-wrap path {
