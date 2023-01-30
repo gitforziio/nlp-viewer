@@ -12,9 +12,9 @@ diagram.diagram > svg {
   margin: 0 auto;
 }
 
-diagram.diagram > svg g.arc-span-unit-wrap path {
+/* diagram.diagram > svg g.arc-span-unit-wrap path {
   opacity: 0.25;
-}
+} */
 
 diagram.diagram > svg g.arc-span-unit-wrap path:hover {
   opacity: 1;

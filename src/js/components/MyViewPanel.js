@@ -107,22 +107,10 @@ export default function MyViewPanel(props) {
       // console.log("end");
       // console.log(event);
     }},
-    // {name: "resize", fn: (event)=>{
-    //   console.log("resize");
-    //   console.log(event);
-    // }},
-    // {name: "tick", fn: (event)=>{
-    //   console.log("tick");
-    //   console.log(event);
-    // }},
-    // {name: "drag", fn: (event)=>{
-    //   console.log("drag");
-    //   console.log(event);
-    // }},
-    // {name: "drag-move", fn: (event)=>{
-    //   console.log("drag-move");
-    //   console.log(event);
-    // }},
+    // { name: "resize", fn: (event)=>{console.log("resize");console.log(event);} },
+    // { name: "tick", fn: (event)=>{console.log("tick");console.log(event);} },
+    // { name: "drag", fn: (event)=>{console.log("drag");console.log(event);} },
+    // { name: "drag-move", fn: (event)=>{console.log("drag-move");console.log(event);} },
     {name: "drag-start", fn: (event)=>{
       // console.log("drag-start");
       // console.log(event);
@@ -176,6 +164,28 @@ export default function MyViewPanel(props) {
 
 
 
+  const saveSVG = async()=>{
+    // MessagePlugin.info("功能待开发");
+    if (theVis?.svg?.node?.()==null) {
+      MessagePlugin.info("请先绘制图形");
+      return;
+    };
+
+    const node = theVis?.svg?.node?.()?.cloneNode?.(true);
+    const d3Node = MyVis.D3.select(node);
+
+    d3Node
+      .attr("height", 2 * theVis.rootHeight)
+      .attr("width", 2 * theVis.rootWidth)
+      .attr("viewBox", theVis.rootViewBox)
+      .call(theVis.zoom.transform, MyVis.D3.zoomIdentity)
+    ;
+
+    saveText(d3Node?.node?.()?.outerHTML, `${elementId}.svg`);
+  };
+
+
+
   return vNode('div', {
     className: [
       "my-2 p-2",
@@ -211,8 +221,6 @@ export default function MyViewPanel(props) {
           await theVis.clean();
           await theVis.init(true);
           set_alt("");
-          // console.log(theVis);
-          // console.log(theVis?.svg_g_root);
           set_theVis(theVis);
         },
       }, "重新绘制")),
@@ -225,10 +233,6 @@ export default function MyViewPanel(props) {
           "btn-outline-secondary",
         ].join(" "),
         onClick: ()=>{
-          // console.log(myVis);
-          // console.log(myVis?.svg_g_root);
-          // console.log(theVis);
-          // console.log(theVis?.svg_g_root);
           theVis.resize();
         },
       }, "调整布局")),
@@ -276,14 +280,7 @@ export default function MyViewPanel(props) {
           "btn btn-sm",
           "btn-outline-secondary",
         ].join(" "),
-        onClick: async()=>{
-          // MessagePlugin.info("功能待开发");
-          if (theVis?.svg?.node?.()==null) {
-            MessagePlugin.info("请先绘制图形");
-            return;
-          };
-          saveText(theVis?.svg?.node?.()?.outerHTML, `${elementId}.svg`);
-        },
+        onClick: saveSVG,
       }, "导出SVG")),
       true ? null : vNode(Tooltip, {
         content: "将此图形以PNG格式导出保存",

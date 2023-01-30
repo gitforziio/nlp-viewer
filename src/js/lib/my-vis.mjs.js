@@ -208,6 +208,9 @@ const MyVis = class MyVis {
       alphaDecay: wrap?.config?.alphaDecay ?? 0.1,
       velocityDecay: wrap?.config?.velocityDecay ?? 0.3,
 
+      resizeAtEnd: wrap?.config?.resizeAtEnd ?? false,
+      resizeAtEndState: false,
+
       realTimeResize: wrap?.config?.realTimeResize ?? false,
       realTimeResizeState: false,
       // TODO: 改名
@@ -429,8 +432,8 @@ const MyVis = class MyVis {
       units: [],
     };
     this.things = things;
-    this._makeChars();
     this._makeSpans();
+    this._makeChars();
     this._makeChunks();
     this._makeUnits();
     this._makeForcedNodesAndLinks();
@@ -461,6 +464,7 @@ const MyVis = class MyVis {
     };
 
     if (!things.chars.length) {
+      // TODO : 这里算法不太对 如果有些 token 是交叉着的 那么这个算法会导致序号错乱
       for (const ii in tokens) {
         const token = tokens[ii];
         const token_text = typeof(token)=="string" ? token : (token?.text ?? token?.word ?? token?.content ?? token?.face ?? "");
@@ -1471,7 +1475,19 @@ const MyVis = class MyVis {
         .attr("stroke", lk=>_linkTypeToColor(lk))
         // .attr("marker-end", `url(${new URL(`#svg-mark-arrow`, location)})`)
         .attr("d", lk=>_makeSpanUnitArcFn(lk))
-        // .style("opacity", "0.25")
+        .style("opacity", "0.25")
+        .on("mouseenter", event=>{
+          d3.select(event.target).transition().duration(500)
+          .style("opacity", "1")
+          .attr("stroke-width", 3)
+          ;
+        })
+        .on("mouseleave", event=>{
+          d3.select(event.target).transition().duration(500)
+          .style("opacity", "0.25")
+          .attr("stroke-width", 1)
+          ;
+        })
       ;
     };
     const _eachUnitUnitArcFn = (datum, iii, group) => {
@@ -2177,7 +2193,9 @@ const MyVis = class MyVis {
         },
       });
       this.config.realTimeResizeState = this.config.realTimeResize;
-      this.resize();  // 此时不需要实时resize 而总是需要渐变resize
+      if (this?.config?.resizeAtEnd) {
+        this.resize();  // 此时不需要实时resize 而总是需要渐变resize
+      };
     });
 
     const _dragFn = (sim, dragX=true, dragY=true) => {
@@ -2270,28 +2288,47 @@ const MyVis = class MyVis {
     }, 50);
   }
 
-  resize(realTimeResize=false) {
-    const root_box = this.svg_g_root.node().getBBox();
+  get rootBox() {
+    return this.svg_g_root.node().getBBox();
+  }
+
+  get rootWidth() {
     const padding = this.config.padding;
+    return this.rootBox.width+padding.left+padding.right;
+  }
 
-    const parent_width = this.svg?.node?.()?.parentNode?.getBoundingClientRect?.()?.width;
+  get rootHeight() {
+    const padding = this.config.padding;
+    return this.rootBox.height+padding.top+padding.bottom;
+  }
 
-    const viewBoxAttr = [
-      root_box.x-padding.left,
-      root_box.y-padding.top,
-      root_box.width+padding.left+padding.right,
-      root_box.height+padding.top+padding.bottom,
-    ];
+  get rootViewBox() {
+    const padding = this.config.padding;
+    return [
+      this.rootBox.x-padding.left,
+      this.rootBox.y-padding.top,
+      this.rootWidth,
+      this.rootHeight,
+    ]
+  }
 
-    let widthAttr = root_box.width+padding.left+padding.right;
-    let heightAttr = root_box.height+padding.top+padding.bottom;
+  get parentWidth() {
+    return this.svg?.node?.()?.parentNode?.getBoundingClientRect?.()?.width;
+  }
 
-    let rrrr = 1;
+  resize(realTimeResize=false) {
+    const parent_width = this.parentWidth;
+    const viewBoxAttr = this.rootViewBox;
+
+    let widthAttr = this.rootWidth;
+    let heightAttr = this.rootHeight;
+
+    // let rrrr = 1;
 
     if (parent_width!=null && widthAttr > parent_width) {
       const rt = heightAttr/widthAttr;
       const new_widthAttr = Math.floor(parent_width);
-      rrrr = new_widthAttr/widthAttr;
+      // rrrr = new_widthAttr/widthAttr;
       widthAttr = new_widthAttr;
       const new_heightAttr = Math.ceil(new_widthAttr * rt);
       heightAttr = new_heightAttr;

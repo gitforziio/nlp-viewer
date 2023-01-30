@@ -1,5 +1,9 @@
 import Lodash from "../../../vendor/lodash.mjs.js";
 
+function functionLoader(funcString) {
+  return new Function(`return (${funcString})`)();
+};
+
 export function formatter_AMR_HanLP(it) {
   const that = {
     input: it.input,
