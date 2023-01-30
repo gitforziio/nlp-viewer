@@ -69,8 +69,27 @@ const MyVis = class MyVis {
     return selection;
   }
 
-  static selectChildNodes = function (datum) {
-    console.log(datum);
+  static getRelatedThings = function (vis, datum) {
+    const span_links = vis?.forced_nodes_and_links?.span_unit_links?.filter?.(it=>it?.target==datum);
+    const child_unit_links = vis?.forced_nodes_and_links?.unit_unit_links?.filter?.(it=>it?.source==datum);
+    const parent_unit_links = vis?.forced_nodes_and_links?.unit_unit_links?.filter?.(it=>it?.target==datum);
+    return {
+      self: datum,
+      span_links,
+      child_unit_links,
+      parent_unit_links,
+    };
+
+    // span_links.forEach(it=>{
+    //   it.selected.dispatch("involved", {
+    //     bubbles: true,
+    //     cancelable: true,
+    //     detail: {
+    //       type: "involved",
+    //       datum: it,
+    //     },
+    //   });
+    // });
   }
 
   static VisElement = class VisElement {
@@ -203,6 +222,36 @@ const MyVis = class MyVis {
   constructor(wrap) {
     this.config = {
 
+      svgStyle: wrap?.config?.svgStyle ?? [
+        `g.d3vis-chart-root[data-involving] :is(text, rect, circle) {
+          opacity: 0.5;
+        }
+        g.d3vis-chart-root[data-involving] [data-involved="true"] :is(text, rect, circle) {
+          opacity: 1;
+        }
+        g.d3vis-chart-root[data-involving] [data-involved="true"] :is(text, rect, circle) {
+          opacity: 1;
+        }
+        g.d3vis-chart-root[data-involving] :is(text, path, rect, circle)[data-involved="true"] {
+          opacity: 1;
+        }`,
+        `g.arc-span-unit-wrap path {
+          opacity: 0.25;
+          stroke-width: 1;
+          stroke-dasharray: 2 2;
+          transition: opacity 0.8s, stroke-width 0.8s;
+        }`,
+        `g.arc-span-unit-wrap path:hover {
+          opacity: 1;
+          stroke-width: 3;
+        }`,
+        `g.arc-span-unit-wrap[data-involved="true"] path {
+          opacity: 1;
+          stroke-width: 3;
+          stroke-dasharray: 6 4;
+        }`,
+      ].join("\n").replace(/[\s\t]+/g, " "),
+
       alphaTarget: wrap?.config?.alphaTarget ?? 0,
       dragAlphaTarget: wrap?.config?.dragAlphaTarget ?? 0.05,  // 0.2  0.05
       alphaDecay: wrap?.config?.alphaDecay ?? 0.1,
@@ -291,6 +340,9 @@ const MyVis = class MyVis {
       .style("font-size", config.text_size)
       // .attr("width", `${the_len * config_unit_step + config.unit_spacing + config.margin.left + config.margin.right}`)
       // .attr("height", `${the_hit * config_unit_step + config.unit_spacing + config.margin.top + config.margin.bottom}`)
+    ;
+    this.svg_style = this.svg.append("style")
+      .text(this?.config?.svgStyle)
     ;
 
     // Per-type markers, as they don't inherit styles.
@@ -1339,6 +1391,7 @@ const MyVis = class MyVis {
             type: "click-unit",
             event: event,
             datum: me.datum(),
+            vis: this,
           },
         });
       })
@@ -1470,24 +1523,9 @@ const MyVis = class MyVis {
       datum.selection(parent_selection);
       parent_selection.append("path")
         .attr("fill", "none")
-        .attr("stroke-width", 1)
-        .attr("stroke-dasharray", "2 2")
         .attr("stroke", lk=>_linkTypeToColor(lk))
         // .attr("marker-end", `url(${new URL(`#svg-mark-arrow`, location)})`)
         .attr("d", lk=>_makeSpanUnitArcFn(lk))
-        .style("opacity", "0.25")
-        .on("mouseenter", event=>{
-          d3.select(event.target).transition().duration(500)
-          .style("opacity", "1")
-          .attr("stroke-width", 3)
-          ;
-        })
-        .on("mouseleave", event=>{
-          d3.select(event.target).transition().duration(500)
-          .style("opacity", "0.25")
-          .attr("stroke-width", 1)
-          ;
-        })
       ;
     };
     const _eachUnitUnitArcFn = (datum, iii, group) => {

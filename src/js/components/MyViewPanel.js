@@ -88,37 +88,65 @@ export default function MyViewPanel(props) {
   }, []);
 
   const myVisEventHandlerInfoList = [
+    {name: "click", fn: (event)=>{
+      if (event?.target == theVis.svg.node()) {
+        console.log("click:\n", event);
+        theVis?.svg_g_root.attr("data-involving", null);
+        theVis?.forced_nodes_and_links?.span_unit_links?.forEach?.(it=>{
+          it.selected.attr("data-involved", null);
+          // if (it.state_involved) {
+          //   it.selected.attr("data-involved", null);
+          //   it.state_involved = false;
+          // };
+        });
+      };
+    }},
     {name: "click-unit", fn: (event)=>{
-      console.log("click-unit");
       const datum = event?.detail?.datum;
-      // console.log(datum);
-      const selectChildNodes = Object.getPrototypeOf(theVis)?.constructor?.selectChildNodes;
-      // console.log(selectChildNodes);
-      selectChildNodes?.(datum);
+      const vis = event?.detail?.vis;
+      const getRelatedThings = MyVis.getRelatedThings;
+      const relatedThings = getRelatedThings?.(vis, datum);
 
-      // console.log(event);
-      // console.log(myVis);
-      // console.log(myVis.things);
-      // console.log(theVis);
-      // console.log(theVis.things);
-      // const D3 = Object.getPrototypeOf(theVis)?.constructor?.D3;
+      vis?.svg_g_root.attr("data-involving", true);
+
+      for (const set of ["chunk_nodes", "span_nodes", "unit_nodes", "span_unit_links", "unit_unit_links"]) {
+        for (const it of (vis?.forced_nodes_and_links?.[set]??[])) {
+          it.selected.attr("data-involved", null);
+          // if (it.state_involved) {
+          //   it.selected.attr("data-involved", null);
+          //   it.state_involved = false;
+          // };
+        };
+      };
+
+      for (const set of [" ", "span_links", "child_unit_links"]) {
+        for (const it of (relatedThings?.[set]??[])) {
+          it.selected.attr("data-involved", true);
+          // it.state_involved = true;
+        };
+      };
+      datum.selected.attr("data-involved", true);
+
+      console.log("click-unit:\n", event);
+      console.log({datum, vis, relatedThings});
     }},
+    // {name: "involved", fn: (event)=>{
+    //   console.log("involved:\n", event);
+    // }},
+
     {name: "end", fn: (event)=>{
-      // console.log("end");
-      // console.log(event);
+      // console.log("end:\n", event);
     }},
-    // { name: "resize", fn: (event)=>{console.log("resize");console.log(event);} },
-    // { name: "tick", fn: (event)=>{console.log("tick");console.log(event);} },
-    // { name: "drag", fn: (event)=>{console.log("drag");console.log(event);} },
-    // { name: "drag-move", fn: (event)=>{console.log("drag-move");console.log(event);} },
     {name: "drag-start", fn: (event)=>{
-      // console.log("drag-start");
-      // console.log(event);
+      // console.log("drag-start:\n", event);
     }},
     {name: "drag-end", fn: (event)=>{
-      // console.log("drag-end");
-      // console.log(event);
+      // console.log("drag-end:\n", event);
     }},
+    // { name: "drag-move", fn: (event)=>{console.log("drag-move:\n", event);} },
+    // { name: "drag", fn: (event)=>{console.log("drag:\n", event);} },
+    // { name: "resize", fn: (event)=>{console.log("resize:\n", event);} },
+    // { name: "tick", fn: (event)=>{console.log("tick:\n", event);} },
   ];
   const myVisWrapperRef = useRef(null);
   useEffect(()=>{
