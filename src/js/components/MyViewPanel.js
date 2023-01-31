@@ -92,13 +92,12 @@ export default function MyViewPanel(props) {
       if (event?.target == theVis.svg.node()) {
         console.log("click:\n", event);
         theVis?.svg_g_root.attr("data-involving", null);
-        theVis?.forced_nodes_and_links?.span_unit_links?.forEach?.(it=>{
-          it.selected.attr("data-involved", null);
-          // if (it.state_involved) {
-          //   it.selected.attr("data-involved", null);
-          //   it.state_involved = false;
-          // };
-        });
+        theVis?.things?.chars?.forEach?.(it=>{it.selected.attr("data-involved", null);});
+        for (const set of ["chunk_nodes", "span_nodes", "unit_nodes", "span_unit_links", "unit_unit_links"]) {
+          for (const it of (theVis?.forced_nodes_and_links?.[set]??[])) {
+            it.selected.attr("data-involved", null);
+          };
+        };
       };
     }},
     {name: "click-unit", fn: (event)=>{
@@ -109,6 +108,7 @@ export default function MyViewPanel(props) {
 
       vis?.svg_g_root.attr("data-involving", true);
 
+      vis?.things?.chars?.forEach?.(it=>{it.selected.attr("data-involved", null);});
       for (const set of ["chunk_nodes", "span_nodes", "unit_nodes", "span_unit_links", "unit_unit_links"]) {
         for (const it of (vis?.forced_nodes_and_links?.[set]??[])) {
           it.selected.attr("data-involved", null);

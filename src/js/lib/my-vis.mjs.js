@@ -246,17 +246,33 @@ const MyVis = class MyVis {
     this.config = {
 
       svgStyle: wrap?.config?.svgStyle ?? [
-        `g.d3vis-chart-root[data-involving] :is(tspan, text:not(.chunk-text), rect, circle) {
+        `g.d3vis-chart-root[data-involving] :is(text:not(.chunk-text), rect, circle) {
           opacity: 0.5;
         }`,
-        `g.d3vis-chart-root[data-involving] [data-involved="true"] :is(tspan, text:not(.chunk-text), rect, circle) {
+        `g.d3vis-chart-root[data-involving] [data-involved="true"] :is(text:not(.chunk-text), rect, circle) {
           opacity: 1;
         }
-        g.d3vis-chart-root[data-involving] [data-involved="true"] :is(tspan, text:not(.chunk-text), rect, circle) {
+        g.d3vis-chart-root[data-involving] [data-involved="true"] :is(text:not(.chunk-text), rect, circle) {
           opacity: 1;
         }
-        g.d3vis-chart-root[data-involving] :is(tspan, text:not(.chunk-text), rect, circle)[data-involved="true"] {
+        g.d3vis-chart-root[data-involving] :is(text:not(.chunk-text), rect, circle)[data-involved="true"] {
           opacity: 1;
+        }`,
+        `g.d3vis-chart-root[data-involving] :is(.chunk-text tspan) {
+          fill-opacity: 0.5;
+          stroke-opacity: 0.5;
+        }`,
+        `g.d3vis-chart-root[data-involving] [data-involved="true"] :is(.chunk-text tspan) {
+          fill-opacity: 1;
+          stroke-opacity: 1;
+        }
+        g.d3vis-chart-root[data-involving] [data-involved="true"] :is(.chunk-text tspan) {
+          fill-opacity: 1;
+          stroke-opacity: 1;
+        }
+        g.d3vis-chart-root[data-involving] :is(.chunk-text tspan)[data-involved="true"] {
+          fill-opacity: 1;
+          stroke-opacity: 1;
         }`,
         `g.arc-span-unit-wrap path {
           opacity: 0.25;
