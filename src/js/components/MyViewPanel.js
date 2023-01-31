@@ -91,44 +91,14 @@ export default function MyViewPanel(props) {
     {name: "click", fn: (event)=>{
       if (event?.target == theVis.svg.node()) {
         console.log("click:\n", event);
-        theVis?.svg_g_root.attr("data-involving", null);
-        theVis?.things?.chars?.forEach?.(it=>{it.selected.attr("data-involved", null);});
-        for (const set of ["chunk_nodes", "span_nodes", "unit_nodes", "span_unit_links", "unit_unit_links"]) {
-          for (const it of (theVis?.forced_nodes_and_links?.[set]??[])) {
-            it.selected.attr("data-involved", null);
-          };
-        };
+        theVis?.clearInvolve();
       };
     }},
     {name: "click-unit", fn: (event)=>{
       const datum = event?.detail?.datum;
       const vis = event?.detail?.vis;
-      const getRelatedThings = MyVis.getRelatedThings;
-      const relatedThings = getRelatedThings?.(vis, datum);
-
-      vis?.svg_g_root.attr("data-involving", true);
-
-      vis?.things?.chars?.forEach?.(it=>{it.selected.attr("data-involved", null);});
-      for (const set of ["chunk_nodes", "span_nodes", "unit_nodes", "span_unit_links", "unit_unit_links"]) {
-        for (const it of (vis?.forced_nodes_and_links?.[set]??[])) {
-          it.selected.attr("data-involved", null);
-          // if (it.state_involved) {
-          //   it.selected.attr("data-involved", null);
-          //   it.state_involved = false;
-          // };
-        };
-      };
-
-      for (const set of ["chars", "spans", "child_units", "span_links", "child_unit_links"]) {
-        for (const it of (relatedThings?.[set]??[])) {
-          it.selected.attr("data-involved", true);
-          // it.state_involved = true;
-        };
-      };
-      datum.selected.attr("data-involved", true);
-
+      vis?.involveUnit(datum);
       console.log("click-unit:\n", event);
-      console.log({datum, vis, relatedThings});
     }},
     // {name: "involved", fn: (event)=>{
     //   console.log("involved:\n", event);

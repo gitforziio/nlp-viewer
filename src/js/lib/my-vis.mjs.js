@@ -345,6 +345,29 @@ const MyVis = class MyVis {
     d3.select(`#${elementId}`).selectAll(`svg`).remove();
   }
 
+  clearInvolve() {
+    this?.svg_g_root.attr("data-involving", null);
+    this?.things?.chars?.forEach?.(it=>{it.selected.attr("data-involved", null);});
+    for (const set of ["chunk_nodes", "span_nodes", "unit_nodes", "span_unit_links", "unit_unit_links"]) {
+      for (const it of (this?.forced_nodes_and_links?.[set]??[])) {
+        it.selected.attr("data-involved", null);
+      };
+    };
+  }
+  involveUnit(datum) {
+    this?.clearInvolve();
+    this?.svg_g_root.attr("data-involving", true);
+
+    const relatedThings = MyVis.getRelatedThings?.(this, datum);
+    for (const set of ["chars", "spans", "child_units", "span_links", "child_unit_links"]) {
+      for (const it of (relatedThings?.[set]??[])) {
+        it.selected.attr("data-involved", true);
+        // it.state_involved = true;
+      };
+    };
+    datum.selected.attr("data-involved", true);
+  }
+
   async init(realTimeResize=false) {
     const cfgSlct = MyVis.configSelection;
     const d3 = MyVis.D3;
